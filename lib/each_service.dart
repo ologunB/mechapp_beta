@@ -216,7 +216,7 @@ class _EachServiceState extends State<EachService>
                                         child: Text(
                                           mechList[index].phoneNumber,
                                           style: TextStyle(
-                                              fontSize: 18,
+                                              fontSize: 17,
                                               fontWeight: FontWeight.w500,
                                               color: Colors.black54),
                                         ),
@@ -232,7 +232,7 @@ class _EachServiceState extends State<EachService>
                               title: Text(
                                 mechList[index].name,
                                 style: TextStyle(
-                                    fontSize: 20,
+                                    fontSize: 18,
                                     fontWeight: FontWeight.w700,
                                     color: Colors.black),
                               ),

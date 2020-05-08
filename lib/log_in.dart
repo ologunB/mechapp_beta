@@ -296,10 +296,8 @@ class _SignInPageState extends State<SignInPage> {
                                                                   });
                                                                 },
                                                       icon: forgotPassIsLoading
-                                                          ? CircularProgressIndicator(
-                                                              backgroundColor:
-                                                                  Colors.white,
-                                                            )
+                                                          ? CupertinoActivityIndicator(
+                                                              radius: 20)
                                                           : Icon(
                                                               Icons
                                                                   .arrow_forward,
@@ -350,9 +348,8 @@ class _SignInPageState extends State<SignInPage> {
                                                       _inPass.text);
                                                 },
                                           icon: isLoading
-                                              ? CircularProgressIndicator(
-                                                  backgroundColor: Colors.white,
-                                                )
+                                              ? CupertinoActivityIndicator(
+                                                  radius: 20)
                                               : Icon(
                                                   Icons.arrow_forward,
                                                   color: Colors.white,
@@ -597,9 +594,7 @@ class _CusSignUpState extends State<CusSignUp> {
                               cusSignUp(_upEmail.text, _upPass.text);
                             },
                       icon: isLoading
-                          ? CircularProgressIndicator(
-                              backgroundColor: Colors.white,
-                            )
+                          ? CupertinoActivityIndicator(radius: 20)
                           : Icon(
                               Icons.done,
                               color: Colors.white,
@@ -1144,9 +1139,7 @@ class _MechSignUpState extends State<MechSignUp> {
                             }
                           },
                     icon: isLoading
-                        ? CircularProgressIndicator(
-                            backgroundColor: Colors.white,
-                          )
+                        ? CupertinoActivityIndicator(radius: 20)
                         : Icon(
                             Icons.done,
                             color: Colors.white,

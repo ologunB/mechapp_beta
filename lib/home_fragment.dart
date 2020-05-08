@@ -232,7 +232,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                   theAddress,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 15,
                       color: Colors.white,
                       fontWeight: FontWeight.w500),
                 ),
@@ -316,7 +316,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                                     child: Text(
                                       httpServicesList[index].typeTitle,
                                       style: TextStyle(
-                                          fontSize: 20, color: primaryColor),
+                                          fontSize: 18, color: primaryColor),
                                       textAlign: TextAlign.center,
                                     ),
                                   ),

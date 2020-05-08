@@ -114,15 +114,15 @@ class _ViewMechProfileState extends State<ViewMechProfile>
                             "Description: ",
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                                fontSize: 20,
+                                fontSize: 18,
                                 color: Colors.red,
-                                fontWeight: FontWeight.w700),
+                                fontWeight: FontWeight.w400),
                           ),
                           Flexible(
                             child: Text(
                               widget.mechanic.descrpt,
                               style: TextStyle(
-                                  fontSize: 22,
+                                  fontSize: 20,
                                   color: primaryColor,
                                   fontWeight: FontWeight.w700),
                             ),
@@ -139,15 +139,15 @@ class _ViewMechProfileState extends State<ViewMechProfile>
                             "Location: ",
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                                fontSize: 20,
+                                fontSize: 18,
                                 color: Colors.red,
-                                fontWeight: FontWeight.w700),
+                                fontWeight: FontWeight.w400),
                           ),
                           Flexible(
                             child: Text(
                               widget.mechanic.streetName,
                               style: TextStyle(
-                                  fontSize: 22,
+                                  fontSize: 20,
                                   color: primaryColor,
                                   fontWeight: FontWeight.w700),
                             ),
