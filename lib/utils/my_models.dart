@@ -57,21 +57,21 @@ class EachMechanic {
 
   EachMechanic(
       {this.uid,
-        this.name,
-        this.locality,
-        this.categories,
-        this.specs,
-        this.descrpt,
-        this.email,
-        this.phoneNumber,
-        this.image,
-        this.jobsDone,
-        this.mLat,
-        this.city,
-        this.mLong,
-        this.dBtwn,
-        this.rating,
-        this.streetName});
+      this.name,
+      this.locality,
+      this.categories,
+      this.specs,
+      this.descrpt,
+      this.email,
+      this.phoneNumber,
+      this.image,
+      this.jobsDone,
+      this.mLat,
+      this.city,
+      this.mLong,
+      this.dBtwn,
+      this.rating,
+      this.streetName});
 }
 
 class EachJob {

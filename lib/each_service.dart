@@ -71,15 +71,16 @@ class _EachServiceState extends State<EachService>
           LatLng(currentLocation.latitude, currentLocation.longitude);
     });
 
-    List<Placemark> placeMark = await Geolocator().placemarkFromCoordinates(
+    /* List<Placemark> placeMark = await Geolocator().placemarkFromCoordinates(
         currentLocation.latitude, currentLocation.longitude);
-
+*/
     setState(() {
       markers.add(
         Marker(
           markerId: MarkerId("Current Location"),
           position: LatLng(currentLocation.latitude, currentLocation.longitude),
-          infoWindow: InfoWindow(title: mName, snippet: placeMark[0].name),
+          infoWindow: InfoWindow(
+              title: mName, snippet: /*placeMark[0].name*/ "Decoded location"),
           icon: BitmapDescriptor.defaultMarkerWithHue(120.0),
           onTap: () {},
         ),

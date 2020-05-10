@@ -33,14 +33,63 @@ class _HomeFragmentState extends State<HomeFragment> {
   }
 
   getUserLocation() async {
-    currentLocation = await locateUser();
+    try {
+      currentLocation = await locateUser();
 
-    List<Placemark> placeMark = await Geolocator().placemarkFromCoordinates(
-        currentLocation.latitude, currentLocation.longitude);
+      List<Placemark> placeMark = await Geolocator().placemarkFromCoordinates(
+          currentLocation.latitude, currentLocation.longitude);
 
-    setState(() {
-      theAddress = placeMark[0].name + ", " + placeMark[0].locality;
-    });
+      setState(() {
+        theAddress = placeMark[0].name + ", " + placeMark[0].locality;
+      });
+    } catch (e) {
+      showCupertinoDialog(
+          context: context,
+          builder: (_) {
+            return CupertinoAlertDialog(
+              title: Text(
+                "Error getting Location",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.red, fontSize: 20),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text("App might not function well"),
+                  Icon(Icons.error)
+                ],
+              ),
+              actions: <Widget>[
+                Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(5.0),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(50),
+                        color: Color.fromARGB(255, 22, 58, 78),
+                      ),
+                      child: FlatButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          "OK",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
+          });
+    }
   }
 
   List<EachMechanic> mechList = [];

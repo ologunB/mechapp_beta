@@ -9,6 +9,8 @@ import 'package:mechapp/utils/type_constants.dart';
 import 'main_cart.dart';
 
 class ShopContainer extends StatefulWidget {
+  String from;
+  ShopContainer(this.from);
   @override
   _ShopContainerState createState() => _ShopContainerState();
 }
@@ -75,7 +77,8 @@ class _ShopContainerState extends State<ShopContainer>
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          iconTheme: IconThemeData(color: primaryColor),
+          iconTheme: IconThemeData(
+              color: widget.from == "cart" ? Colors.white : primaryColor),
           backgroundColor: primaryColor,
           elevation: 0.0,
           title: isSearchingShop

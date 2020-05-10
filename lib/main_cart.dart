@@ -1,6 +1,13 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mechapp/database/cart_model.dart';
+import 'package:mechapp/shop_fragment.dart';
+import 'package:mechapp/utils/type_constants.dart';
 
+import 'cart_history_details.dart';
+import 'database/database.dart';
 import 'libraries/custom_button.dart';
 
 class MainCart extends StatefulWidget {
@@ -69,10 +76,56 @@ class MyCart extends StatefulWidget {
 class _MyCartState extends State<MyCart> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
-  var counter = 0;
   List<Item> _data = [Item(isExpanded: false)];
 
   List<Item> _data2 = [Item(isExpanded: false)];
+
+  List<CartModel> cartItems, items;
+  List<int> counters;
+
+  @override
+  void initState() {
+    getData();
+    super.initState();
+    counters = List();
+  }
+
+  double total = 0;
+  Future<List<CartModel>> getItems;
+  void getData() async {
+    final database =
+        await $FloorAppDatabase.databaseBuilder('flutter_database.db').build();
+    final dao = database.cartDao;
+
+    getItems = dao.getItems();
+    cartItems = await dao.getItems();
+
+    Future.delayed(Duration(milliseconds: 500)).then((a) {
+      for (int i = 0; i < cartItems.length; i++) {
+        total = total + double.parse(cartItems[i].price);
+        setState(() {});
+      }
+    });
+    setState(() {});
+  }
+
+  void doDelete(int index, BuildContext context) async {
+    final database =
+        await $FloorAppDatabase.databaseBuilder('flutter_database.db').build();
+    database.cartDao.deleteOneItem(items[index]).then((a) {
+      showToast("Item Deleted", context);
+      items.removeAt(index);
+      cartItems.removeAt(index);
+      counters.removeAt(index);
+      total = 0;
+      for (int i = 0; i < cartItems.length; i++) {
+        total = total + double.parse(cartItems[i].price);
+        setState(() {});
+      }
+      setState(() {});
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -95,147 +148,237 @@ class _MyCartState extends State<MyCart> with AutomaticKeepAliveClientMixin {
                           title: Text(
                             "Cart Items",
                             style: TextStyle(
-                                fontSize: 22, fontWeight: FontWeight.bold),
+                                fontSize: 20, fontWeight: FontWeight.bold),
                           ),
                         );
                       },
-                      body: Container(
-                        height: MediaQuery.of(context).size.height / 2,
-                        child: ListView.builder(
-                            itemCount: 7,
-                            itemBuilder: (context, position) {
-                              return Card(
-                                child: Container(
-                                  height: 110,
-                                  width: double.infinity,
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: <Widget>[
-                                      Row(
-                                        children: <Widget>[
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Container(
-                                              height: 50,
-                                              width: 50,
-                                              decoration: BoxDecoration(
-                                                image: DecorationImage(
-                                                  image: AssetImage(
-                                                      "assets/images/placeholder.png"),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          Padding(
-                                            padding: EdgeInsets.symmetric(
-                                                horizontal: 10.0, vertical: 9),
-                                            child: Container(
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: <Widget>[
-                                                  Text(
-                                                    "Gear Box",
-                                                    style: TextStyle(
-                                                        fontSize: 20,
-                                                        fontWeight:
-                                                            FontWeight.bold),
-                                                  ),
-                                                  Text(
-                                                    "Sold by: Alan Ray",
-                                                    style: TextStyle(
-                                                      fontSize: 17,
-                                                    ),
-                                                  ),
+                      body: FutureBuilder(
+                          future: getItems,
+                          builder: (context, snaps) {
+                            if (snaps.connectionState == ConnectionState.done) {
+                              items = snaps.data;
 
-                                                  Text(
-                                                    "\₦" + "33",
-                                                    style: TextStyle(
-                                                        fontSize: 18,
-                                                        fontWeight:
-                                                            FontWeight.w900,
-                                                        color:
-                                                            Colors.deepPurple),
-                                                  )
-                                                  //CupertinoTextField()
-                                                ],
+                              List.generate(items.length, (i) {
+                                counters.add(1);
+                              });
+                              return Container(
+                                color: Colors.grey[200],
+                                height: MediaQuery.of(context).size.height / 2,
+                                child: items.isEmpty
+                                    ? Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          Text(
+                                            "Cart is empty, Go to shop",
+                                            style: TextStyle(fontSize: 18),
+                                          ),
+                                          Center(
+                                            child: CustomButton(
+                                              title: " SHOP ",
+                                              onPress: () {
+                                                Navigator.push(
+                                                    context,
+                                                    CupertinoPageRoute(
+                                                        builder: (context) =>
+                                                            ShopContainer(
+                                                                "cart")));
+                                              },
+                                              icon: Icon(
+                                                Icons.arrow_forward,
+                                                color: Colors.white,
                                               ),
+                                              iconLeft: false,
                                             ),
                                           ),
                                         ],
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Align(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.center,
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: <Widget>[
-                                              Align(
-                                                alignment:
-                                                    Alignment.centerRight,
-                                                child: InkWell(
-                                                  onTap: () {},
-                                                  child: Icon(
-                                                    Icons.delete,
-                                                    color: Colors.red,
-                                                    size: 30,
-                                                  ),
-                                                ),
-                                              ),
-                                              Row(
+                                      )
+                                    : ListView.builder(
+                                        itemCount: items.length,
+                                        shrinkWrap: true,
+                                        itemBuilder: (context, index) {
+                                          return Card(
+                                            child: Container(
+                                              width: double.infinity,
+                                              child: Column(
+                                                mainAxisSize: MainAxisSize.min,
                                                 children: <Widget>[
-                                                  IconButton(
-                                                    icon: Icon(
-                                                        Icons.remove_circle,
-                                                        size: 35,
-                                                        color: Colors.black38),
-                                                    onPressed: () {
-                                                      setState(
-                                                        () {
-                                                          if (counter != 0) {
-                                                            counter--;
-                                                          }
-                                                        },
-                                                      );
-                                                    },
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.all(
+                                                            4.0),
+                                                    child: Text(
+                                                      items[index].name,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                      style: TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
                                                   ),
-                                                  Text(
-                                                    "0".toString(),
-                                                    style: TextStyle(
-                                                        fontSize: 32,
-                                                        color: Colors.black38),
-                                                  ),
-                                                  IconButton(
-                                                    icon: Icon(Icons.add_circle,
-                                                        size: 35,
-                                                        color:
-                                                            Colors.deepPurple),
-                                                    onPressed: () {
-                                                      setState(
-                                                        () {
-                                                          counter++;
-                                                        },
-                                                      );
-                                                    },
-                                                  ),
+                                                  Row(
+                                                    children: <Widget>[
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(8.0),
+                                                        child:
+                                                            CachedNetworkImage(
+                                                          imageUrl: items[index]
+                                                              .image,
+                                                          height: 50,
+                                                          width: 50,
+                                                          placeholder: (context,
+                                                                  url) =>
+                                                              CupertinoActivityIndicator(
+                                                            radius: 20,
+                                                          ),
+                                                          errorWidget: (context,
+                                                                  url, error) =>
+                                                              Icon(Icons.error),
+                                                        ),
+                                                      ),
+                                                      Expanded(
+                                                        child: Padding(
+                                                          padding: EdgeInsets
+                                                              .symmetric(
+                                                                  horizontal:
+                                                                      8.0,
+                                                                  vertical: 9),
+                                                          child: Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .start,
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            children: <Widget>[
+                                                              Text(
+                                                                "By: ${items[index].seller}",
+                                                                style:
+                                                                    TextStyle(
+                                                                  fontSize: 17,
+                                                                ),
+                                                              ),
+                                                              Text(
+                                                                "\₦ ${items[index].price}",
+                                                                style: TextStyle(
+                                                                    fontSize:
+                                                                        18,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .w900,
+                                                                    color:
+                                                                        primaryColor),
+                                                              )
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Padding(
+                                                        padding:
+                                                            const EdgeInsets
+                                                                .all(8.0),
+                                                        child: Align(
+                                                          child: Column(
+                                                            crossAxisAlignment:
+                                                                CrossAxisAlignment
+                                                                    .center,
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                            children: <Widget>[
+                                                              Align(
+                                                                alignment: Alignment
+                                                                    .centerRight,
+                                                                child:
+                                                                    IconButton(
+                                                                  onPressed:
+                                                                      () async {
+                                                                    doDelete(
+                                                                        index,
+                                                                        context);
+                                                                  },
+                                                                  icon: Icon(
+                                                                    Icons
+                                                                        .delete,
+                                                                    color: Colors
+                                                                        .red,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                              Row(
+                                                                children: <
+                                                                    Widget>[
+                                                                  IconButton(
+                                                                    icon: Icon(
+                                                                        Icons
+                                                                            .remove_circle,
+                                                                        color: Colors
+                                                                            .black38),
+                                                                    onPressed:
+                                                                        () {
+                                                                      if (counters[
+                                                                              index] >
+                                                                          0) {
+                                                                        counters[
+                                                                            index]--;
+
+                                                                        total = total -
+                                                                            double.parse(items[index].price);
+                                                                        setState(
+                                                                            () {});
+                                                                      }
+                                                                    },
+                                                                  ),
+                                                                  Text(
+                                                                    counters[
+                                                                            index]
+                                                                        .toString(),
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            24,
+                                                                        color: Colors
+                                                                            .black38),
+                                                                  ),
+                                                                  IconButton(
+                                                                    icon: Icon(
+                                                                        Icons
+                                                                            .add_circle,
+                                                                        color: Colors
+                                                                            .deepPurple),
+                                                                    onPressed:
+                                                                        () {
+                                                                      if (counters[
+                                                                              index] <
+                                                                          10) {
+                                                                        counters[
+                                                                            index]++;
+                                                                        total = total +
+                                                                            double.parse(items[index].price);
+                                                                        setState(
+                                                                            () {});
+                                                                      }
+                                                                    },
+                                                                  ),
+                                                                ],
+                                                              )
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  )
                                                 ],
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                              ),
+                                            ),
+                                          );
+                                        }),
                               );
-                            }),
-                      ),
+                            }
+                            return Container();
+                          }),
                       isExpanded: item.isExpanded,
                       canTapOnHeader: true);
                 }).toList(),
@@ -256,7 +399,7 @@ class _MyCartState extends State<MyCart> with AutomaticKeepAliveClientMixin {
                           title: Text(
                             "Local Address",
                             style: TextStyle(
-                                fontSize: 22, fontWeight: FontWeight.bold),
+                                fontSize: 20, fontWeight: FontWeight.bold),
                           ),
                         );
                       },
@@ -320,7 +463,7 @@ class _MyCartState extends State<MyCart> with AutomaticKeepAliveClientMixin {
                     fontWeight: FontWeight.bold,
                     color: Colors.black),
               ),
-              Text("\₦" + "33", //widget.totalValue.toStringAsFixed(2),
+              Text("\₦ ${total}", //widget.totalValue.toStringAsFixed(2),
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -330,7 +473,8 @@ class _MyCartState extends State<MyCart> with AutomaticKeepAliveClientMixin {
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.black)),
-              Text("\₦" + "33", //widget.totalValue.toStringAsFixed(2),
+              Text(
+                  "\₦ ${total.ceil() * 0.1}", //widget.totalValue.toStringAsFixed(2),
                   style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -344,7 +488,8 @@ class _MyCartState extends State<MyCart> with AutomaticKeepAliveClientMixin {
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: Colors.black)),
-                  Text("\₦" + "33", //widget.totalValue.toStringAsFixed(2),
+                  Text(
+                      "\₦ ${(total * 1.1).floor()}", //widget.totalValue.toStringAsFixed(2),
                       style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -354,7 +499,9 @@ class _MyCartState extends State<MyCart> with AutomaticKeepAliveClientMixin {
               Center(
                 child: CustomButton(
                   title: "   PLACE TO ORDER   ",
-                  onPress: () {},
+                  onPress: () {
+                    showToast(counters.toString(), context);
+                  },
                   icon: Icon(
                     Icons.arrow_forward,
                     color: Colors.white,
@@ -370,6 +517,21 @@ class _MyCartState extends State<MyCart> with AutomaticKeepAliveClientMixin {
   }
 }
 
+class CartHistoryModel {
+  List itemNames, sellers, numbers, images;
+  String price, address, id, city, status;
+  CartHistoryModel(
+      {this.itemNames,
+      this.sellers,
+      this.numbers,
+      this.images,
+      this.price,
+      this.address,
+      this.id,
+      this.city,
+      this.status});
+}
+
 class CartHistory extends StatefulWidget {
   @override
   _CartHistoryState createState() => _CartHistoryState();
@@ -379,107 +541,186 @@ class _CartHistoryState extends State<CartHistory>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
-  int counter = 0;
+
+  List<CartHistoryModel> list = [];
+
+  Stream<List<CartHistoryModel>> getData() async* {
+    DatabaseReference dataRef = FirebaseDatabase.instance
+        .reference()
+        .child("Cart Collection")
+        .child(mUID);
+
+    await dataRef.once().then((snapshot) {
+      var KEYS = snapshot.value.keys;
+      var DATA = snapshot.value;
+      print(DATA);
+
+      list.clear();
+      for (var index in KEYS) {
+        List t1 = DATA[index]["Product List"];
+        List t2 = DATA[index]["Product Sellers"];
+        List t3 = DATA[index]["Product Images"];
+        List t4 = DATA[index]["Product Numbers"];
+
+        String t5 = DATA[index]["Total Amount Paid"];
+        String t6 = DATA[index]["Street Address"];
+        String t7 = DATA[index]["Trans ID"];
+        String t8 = DATA[index]["City"];
+        String t9 = DATA[index]["Trans Status"];
+
+        list.add(CartHistoryModel(
+            itemNames: t1,
+            sellers: t2,
+            images: t3,
+            numbers: t4,
+            price: t5,
+            address: t6,
+            id: t7,
+            city: t8,
+            status: t9));
+      }
+    });
+    yield list;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-        itemCount: 4,
-        itemBuilder: (context, position) {
-          return Card(
-            child: Container(
-              height: 110,
-              width: double.infinity,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: <Widget>[
-                  Row(
-                    children: <Widget>[
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Container(
-                          height: 50,
-                          width: 50,
-                          decoration: BoxDecoration(
-                            image: DecorationImage(
-                              image:
-                                  AssetImage("assets/images/placeholder.png"),
+    return StreamBuilder<List<CartHistoryModel>>(
+        stream: getData(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done) {
+            List<CartHistoryModel> items = snapshot.data;
+            return ListView.builder(
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                              builder: (context) => CartHistoryDetails(
+                                    cartItem: items[index],
+                                  )));
+                    },
+                    child: Card(
+                      child: Container(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Flexible(
+                              child: Padding(
+                                padding: const EdgeInsets.all(5.0),
+                                child: Text(
+                                  items[index].itemNames[0],
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding:
-                            EdgeInsets.symmetric(horizontal: 10.0, vertical: 9),
-                        child: Container(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Text(
-                                "Gear Box",
-                                style: TextStyle(
-                                    fontSize: 20, fontWeight: FontWeight.bold),
-                              ),
-                              Text(
-                                "Sold by: Alan Ray",
-                                style: TextStyle(
-                                  fontSize: 17,
-                                ),
-                              ),
-
-                              Text(
-                                "\₦" + "33",
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.deepPurple),
-                              )
-                              //CupertinoTextField()
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Align(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: Row(
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: <Widget>[
-                                Text(
-                                  "x ",
-                                  style: TextStyle(
-                                      fontSize: 28, color: Colors.black38),
+                                Row(
+                                  children: <Widget>[
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: CachedNetworkImage(
+                                        imageUrl: items[index].images[0],
+                                        height: 50,
+                                        width: 50,
+                                        placeholder: (context, url) =>
+                                            CupertinoActivityIndicator(
+                                                radius: 20),
+                                        errorWidget: (context, url, error) =>
+                                            Icon(Icons.error),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 10.0, vertical: 9),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: <Widget>[
+                                          Text(
+                                            "By: ${items[index].sellers[0]}",
+                                            style: TextStyle(
+                                              fontSize: 17,
+                                            ),
+                                          ),
+
+                                          Text(
+                                            "\₦ ${items[index].price}",
+                                            style: TextStyle(
+                                                fontSize: 18,
+                                                fontWeight: FontWeight.w900,
+                                                color: Colors.deepPurple),
+                                          )
+                                          //CupertinoTextField()
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                                Text(
-                                  "0".toString(),
-                                  style: TextStyle(
-                                      fontSize: 28, color: Colors.black38),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Align(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: <Widget>[
+                                        Align(
+                                          alignment: Alignment.centerRight,
+                                          child: Row(
+                                            children: <Widget>[
+                                              Text(
+                                                "x ",
+                                                style: TextStyle(
+                                                    fontSize: 28,
+                                                    color: Colors.black38),
+                                              ),
+                                              Text(
+                                                items[index]
+                                                    .images
+                                                    .length
+                                                    .toString(),
+                                                style: TextStyle(
+                                                    fontSize: 28,
+                                                    color: Colors.black38),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Text(
+                                          items[index].status,
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            color: items[index].status ==
+                                                    "Delivered"
+                                                ? Colors.green
+                                                : Colors.red,
+                                          ),
+                                        )
+                                      ],
+                                    ),
+                                  ),
                                 ),
                               ],
-                            ),
-                          ),
-                          Text(
-                            "En Route",
-                            style: TextStyle(
-                              fontSize: 18,
-                              color: Colors.red,
-                            ),
-                          )
-                        ],
+                            )
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          );
+                  );
+                });
+          }
+          return CupertinoActivityIndicator(radius: 20);
         });
   }
 }
@@ -489,9 +730,3 @@ class Item {
 
   bool isExpanded;
 }
-
-//onTap: () {
-//setState(() {
-//_data.removeWhere((currentItem) => item == currentItem);
-//});
-//}

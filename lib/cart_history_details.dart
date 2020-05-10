@@ -1,22 +1,18 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:mechapp/database/cart_model.dart';
-import 'package:mechapp/utils/my_models.dart';
 
-import 'database/database.dart';
 import 'libraries/carousel_slider.dart';
-import 'libraries/custom_button.dart';
 import 'main_cart.dart';
 
-class EachProduct extends StatefulWidget {
-  final ShopItem shopItem;
-  EachProduct({Key key, @required this.shopItem}) : super(key: key);
+class CartHistoryDetails extends StatefulWidget {
+  final CartHistoryModel cartItem;
+  CartHistoryDetails({Key key, @required this.cartItem}) : super(key: key);
   @override
-  _EachProductState createState() => _EachProductState();
+  _CartHistoryDetailsState createState() => _CartHistoryDetailsState();
 }
 
-class _EachProductState extends State<EachProduct> {
+class _CartHistoryDetailsState extends State<CartHistoryDetails> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -26,7 +22,7 @@ class _EachProductState extends State<EachProduct> {
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
-        title: Text("Product Item"),
+        title: Text("Ordered Item"),
         centerTitle: true,
       ),
       body: Padding(
@@ -42,7 +38,7 @@ class _EachProductState extends State<EachProduct> {
                   enableInfiniteScroll: true,
                   enlargeCenterPage: true,
                   pauseAutoPlayOnTouch: Duration(seconds: 5),
-                  items: widget.shopItem.images.map((i) {
+                  items: widget.cartItem.images.map((i) {
                     return Builder(
                       builder: (context) {
                         return Container(
@@ -81,7 +77,7 @@ class _EachProductState extends State<EachProduct> {
                     ),
                     Flexible(
                       child: Text(
-                        widget.shopItem.name,
+                        widget.cartItem.itemNames.toString(),
                         style: TextStyle(
                             fontSize: 18,
                             color: primaryColor,
@@ -98,7 +94,7 @@ class _EachProductState extends State<EachProduct> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(
-                      "Description: ",
+                      "City: ",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           fontSize: 18,
@@ -107,7 +103,7 @@ class _EachProductState extends State<EachProduct> {
                     ),
                     Flexible(
                       child: Text(
-                        widget.shopItem.desc,
+                        widget.cartItem.city,
                         style: TextStyle(
                             fontSize: 18,
                             color: primaryColor,
@@ -119,6 +115,58 @@ class _EachProductState extends State<EachProduct> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "Number of Items: ",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.red,
+                          fontWeight: FontWeight.w700),
+                    ),
+                    Flexible(
+                      child: Text(
+                        widget.cartItem.numbers.toString(),
+                        style: TextStyle(
+                            fontSize: 18,
+                            color: primaryColor,
+                            fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "Address: ",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.red,
+                          fontWeight: FontWeight.w700),
+                    ),
+                    Flexible(
+                      child: Text(
+                        widget.cartItem.address,
+                        style: TextStyle(
+                            fontSize: 18,
+                            color: primaryColor,
+                            fontWeight: FontWeight.w700),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,15 +175,15 @@ class _EachProductState extends State<EachProduct> {
                       "Price:   ",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 18,
                           color: Colors.red,
                           fontWeight: FontWeight.w700),
                     ),
                     Flexible(
                       child: Text(
-                        "\₦ " + widget.shopItem.price,
+                        "\₦ " + widget.cartItem.price,
                         style: TextStyle(
-                            fontSize: 25,
+                            fontSize: 18,
                             color: primaryColor,
                             fontWeight: FontWeight.w700),
                       ),
@@ -144,7 +192,7 @@ class _EachProductState extends State<EachProduct> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,15 +201,15 @@ class _EachProductState extends State<EachProduct> {
                       "Sold By:   ",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 18,
                           color: Colors.red,
                           fontWeight: FontWeight.w700),
                     ),
                     Flexible(
                       child: Text(
-                        widget.shopItem.soldBy,
+                        widget.cartItem.sellers.toString(),
                         style: TextStyle(
-                            fontSize: 24,
+                            fontSize: 18,
                             color: primaryColor,
                             fontWeight: FontWeight.w700),
                       ),
@@ -169,52 +217,30 @@ class _EachProductState extends State<EachProduct> {
                   ],
                 ),
               ),
-              CustomButton(
-                title: "   ADD TO CART   ",
-                onPress: () async {
-                  final database = await $FloorAppDatabase
-                      .databaseBuilder('flutter_database.db')
-                      .build();
-                  database.cartDao.insertItem(CartModel(
-                      widget.shopItem.itemID,
-                      widget.shopItem.name,
-                      widget.shopItem.desc,
-                      widget.shopItem.images[0],
-                      widget.shopItem.price,
-                      widget.shopItem.soldBy));
-
-                  scaffoldKey.currentState.showSnackBar(
-                    SnackBar(
-                      duration: Duration(milliseconds: 5000),
-                      backgroundColor: primaryColor,
-                      content: Text(
-                        "Added to cart",
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "Status:   ",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 18,
+                          color: Colors.red,
+                          fontWeight: FontWeight.w700),
+                    ),
+                    Flexible(
+                      child: Text(
+                        widget.cartItem.status,
                         style: TextStyle(
                             fontSize: 18,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.white),
-                      ),
-                      action: SnackBarAction(
-                        label: "CHECKOUT",
-                        textColor: Colors.red,
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            CupertinoPageRoute(
-                              fullscreenDialog: true,
-                              builder: (context) {
-                                return MainCart();
-                              },
-                            ),
-                          );
-                        },
+                            color: primaryColor,
+                            fontWeight: FontWeight.w700),
                       ),
                     ),
-                  );
-                },
-                icon: Icon(
-                  Icons.add_shopping_cart,
-                  color: Colors.white,
+                  ],
                 ),
               ),
             ],

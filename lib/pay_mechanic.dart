@@ -4,13 +4,15 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_rave/flutter_rave.dart';
+import 'package:mechapp/libraries/order_confirmed.dart';
 import 'package:mechapp/utils/my_models.dart';
 import 'package:mechapp/utils/type_constants.dart';
+import 'package:rave_flutter/rave_flutter.dart';
 
 import 'add_car_activity.dart';
 import 'libraries/custom_button.dart';
 import 'libraries/custom_dialog.dart';
+import 'libraries/toast.dart';
 
 class PayMechanicPage extends StatefulWidget {
   final EachMechanic mechanic;
@@ -20,7 +22,7 @@ class PayMechanicPage extends StatefulWidget {
 }
 
 class _PayMechanicPageState extends State<PayMechanicPage> {
-  String t3, t4;
+  String t3, t4, chosenImage = "em";
 
   final carsReference =
       FirebaseDatabase.instance.reference().child("Car Collection").child(mUID);
@@ -67,7 +69,8 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
     return list;
   }
 
-  _pay(BuildContext context) {
+/*
+  _payWithCard(BuildContext context) {
     final _rave = RaveCardPayment(
       isDemo: true,
       //        .setEncryptionKey("ab5cfe0059e5253250eb68a4")
@@ -78,31 +81,45 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
       amount: double.parse(amountController.text),
       email: mEmail,
       onSuccess: (response) {
-        doAfterSuccess(response);
+        Toast.show("success", context,
+            gravity: Toast.TOP, duration: Toast.LENGTH_LONG);
 
-        /*   if (mounted) {
-          scaffoldKey.currentState.showSnackBar(
-            SnackBar(
-              content: Text("Transaction Sucessful!"),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 5),
-              action: SnackBarAction(label: "Done", onPressed: () {}),
-            ),
-          );
-        }*/
+        doAfterSuccess(response);
       },
       onFailure: (err) {
+        Toast.show("err", context,
+            gravity: Toast.TOP, duration: Toast.LENGTH_LONG);
 
-
-       },
+        showDialog(
+            context: context,
+            builder: (_) {
+              return AlertDialog(
+                title: Text(
+                  "Error",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.red, fontSize: 20),
+                ),
+                content: Text(
+                  "An error has occured + $err",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 18),
+                ),
+              );
+            });
+      },
       onClosed: () {
+        Toast.show("closed", context,
+            gravity: Toast.TOP, duration: Toast.LENGTH_LONG);
         if (mounted) {
           scaffoldKey.currentState.showSnackBar(
             SnackBar(
-              content: Text("Closed!", style: TextStyle(color: Colors.white, fontSize: 18),),
+              content: Text(
+                "Closed!",
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
               backgroundColor: primaryColor,
               duration: Duration(seconds: 3),
-             ),
+            ),
           );
         }
       },
@@ -111,6 +128,72 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
 
     _rave.process();
   }
+*/
+
+  processTransaction(context) async {
+    var initializer = RavePayInitializer(
+        amount: double.parse(amountController.text),
+        publicKey: "FLWPUBK_TEST-9ba09916a6e4e8385b9fb2036439beac-X",
+        encryptionKey: "FLWSECK_TEST3ba765b74b1f")
+      ..country = "NG"
+      ..currency = "NGN"
+      ..email = mEmail
+      ..fName = mName
+      ..lName = "lName"
+      ..narration = "FABAT MANAGEMENT"
+      ..txRef = "SCH${DateTime.now().millisecondsSinceEpoch}"
+      ..acceptAccountPayments = false
+      ..acceptCardPayments = true
+      ..acceptAchPayments = false
+      ..acceptGHMobileMoneyPayments = false
+      ..acceptUgMobileMoneyPayments = false
+      ..staging = true
+      ..isPreAuth = true
+      ..displayFee = true;
+
+    RavePayManager()
+        .prompt(context: context, initializer: initializer)
+        .then((result) {
+      Toast.show("err", context,
+          gravity: Toast.TOP, duration: Toast.LENGTH_LONG);
+
+      if (result.status == RaveStatus.success) {
+        doAfterSuccess(result.message);
+      } else if (result.status == RaveStatus.cancelled) {
+        if (mounted) {
+          scaffoldKey.currentState.showSnackBar(
+            SnackBar(
+              content: Text(
+                "Closed!",
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
+              backgroundColor: primaryColor,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      } else if (result.status == RaveStatus.error) {
+        showDialog(
+            context: context,
+            builder: (_) {
+              return AlertDialog(
+                title: Text(
+                  "Error",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.red, fontSize: 20),
+                ),
+                content: Text(
+                  "An error has occured ",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 18),
+                ),
+              );
+            });
+      }
+
+      print(result);
+    });
+  }
 
   bool isLoading = false;
 
@@ -118,7 +201,7 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
   TextEditingController descController = TextEditingController();
   TextEditingController amountController = TextEditingController();
 
-  void doAfterSuccess(String serverData) {
+  void doAfterSuccess(String serverData) async {
     DatabaseReference databaseReference = FirebaseDatabase.instance.reference();
     EachMechanic mech = widget.mechanic;
     String TransactionID = randomString();
@@ -189,35 +272,58 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
     receivedMessage.putIfAbsent("notification_message", () => received);
     receivedMessage.putIfAbsent("notification_time", () => now);
 
+    showCupertinoDialog(
+        context: context,
+        builder: (_) {
+          return AlertDialog(
+            title: Text(
+              "Finishing processing",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.red, fontSize: 20),
+            ),
+            content: CupertinoActivityIndicator(radius: 20),
+          );
+        });
     databaseReference
         .child("Jobs Collection")
         .child("Mechanic")
         .child(mech.uid)
         .child(TransactionID)
-        .set(valuesToMech);
+        .set(valuesToMech)
+        .then((a) {
+      databaseReference
+          .child("Jobs Collection")
+          .child("Customer")
+          .child(mUID)
+          .child(TransactionID)
+          .set(valuesToCustomer)
+          .then((a) {
+        databaseReference
+            .child("All Jobs Collection")
+            .child(mech.uid)
+            .update(updateJobs)
+            .then((a) {
+          Navigator.pushReplacement(
+              context,
+              CupertinoPageRoute(
+                  builder: (context) => OrderConfirmedDone(),
+                  fullscreenDialog: true));
+        });
+      });
+    });
     databaseReference
         .child("Notification Collection")
         .child("Mechanic")
         .child(mech.uid)
         .push()
         .set(receivedMessage);
-    databaseReference
-        .child("Jobs Collection")
-        .child("Customer")
-        .child(mUID)
-        .child(TransactionID)
-        .set(valuesToCustomer);
+
     databaseReference
         .child("Notification Collection")
         .child("Customer")
         .child(mUID)
         .push()
         .set(sentMessage);
-
-    databaseReference
-        .child("All Jobs Collection")
-        .child(mech.uid)
-        .update(updateJobs);
   }
 
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -277,10 +383,10 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
             ),
             Padding(
               padding: const EdgeInsets.all(5.0),
-              child: FlatButton(
+              child: RaisedButton(
                 onPressed: () {
                   scaffoldKey.currentState.showBottomSheet(
-                    (context) => Container(
+                    (_) => Container(
                       height: MediaQuery.of(context).size.height / 3,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -308,16 +414,17 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
                                   ? emptyList("Cars")
                                   : ListView.builder(
                                       itemCount: cars.length,
-                                      itemBuilder: (context, index) {
+                                      itemBuilder: (_, index) {
                                         return GestureDetector(
                                           onTap: () {
                                             Navigator.pop(context);
                                             carController.text =
                                                 cars[index].brand +
-                                                    ", " +
+                                                    " " +
                                                     cars[index].model +
                                                     ", " +
                                                     cars[index].date;
+                                            chosenImage = cars[index].img;
                                             setState(() {});
                                           },
                                           child: Padding(
@@ -445,7 +552,23 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
                 child: CupertinoTextField(
                   prefix: Padding(
                     padding: const EdgeInsets.all(8.0),
-                    child: Icon(Icons.add),
+                    child: CachedNetworkImage(
+                      imageUrl: chosenImage,
+                      height: 30,
+                      width: 30,
+                      placeholder: (_, url) =>
+                          CupertinoActivityIndicator(radius: 10),
+                      errorWidget: (_, url, error) => Container(
+                        height: 30,
+                        width: 30,
+                        decoration: new BoxDecoration(
+                          image: new DecorationImage(
+                            fit: BoxFit.fill,
+                            image: AssetImage("assets/images/car.png"),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                   placeholder: "Add Car",
                   enabled: false,
@@ -493,7 +616,145 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
                   showToast("Fill all fields", context);
                   return;
                 }
-                _pay(context);
+
+                showCupertinoDialog(
+                    context: context,
+                    builder: (_) => CupertinoAlertDialog(
+                          title: Text("Confirmation!"),
+                          content: Text(
+                            "How do you want to pay the Mechanic?",
+                            style: TextStyle(fontSize: 20),
+                          ),
+                          actions: <Widget>[
+                            Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(5.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(50),
+                                      color: Colors.red),
+                                  child: FlatButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                      showCupertinoDialog(
+                                          context: context,
+                                          builder: (_) {
+                                            return CupertinoAlertDialog(
+                                              title: Text(
+                                                "Are you sure you want to pay by cash?",
+                                                textAlign: TextAlign.center,
+                                                style: TextStyle(
+                                                    color: Colors.black,
+                                                    fontSize: 20),
+                                              ),
+                                              actions: <Widget>[
+                                                Center(
+                                                  child: Padding(
+                                                    padding:
+                                                        EdgeInsets.all(5.0),
+                                                    child: Container(
+                                                      decoration: BoxDecoration(
+                                                          borderRadius:
+                                                              BorderRadius
+                                                                  .circular(50),
+                                                          color: Colors.red),
+                                                      child: FlatButton(
+                                                        onPressed: () {
+                                                          Navigator.of(context)
+                                                              .pop();
+                                                        },
+                                                        child: Text(
+                                                          "NO",
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                          style: TextStyle(
+                                                              fontSize: 20,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w900,
+                                                              color:
+                                                                  Colors.white),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Center(
+                                                  child: Padding(
+                                                    padding:
+                                                        EdgeInsets.all(5.0),
+                                                    child: Container(
+                                                      decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(50),
+                                                        color: Color.fromARGB(
+                                                            255, 22, 58, 78),
+                                                      ),
+                                                      child: FlatButton(
+                                                        onPressed: () {
+                                                          doAfterSuccess(
+                                                              "By Cash");
+                                                        },
+                                                        child: Text(
+                                                          "YES",
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                          style: TextStyle(
+                                                              fontSize: 20,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w900,
+                                                              color:
+                                                                  Colors.white),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            );
+                                          });
+                                    },
+                                    child: Text(
+                                      "With Cash",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w900,
+                                          color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Center(
+                              child: Padding(
+                                padding: EdgeInsets.all(5.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(50),
+                                    color: Color.fromARGB(255, 22, 58, 78),
+                                  ),
+                                  child: FlatButton(
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      processTransaction(context);
+                                    },
+                                    child: Text(
+                                      "With Card",
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w900,
+                                          color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ));
               },
               icon: Icon(
                 Icons.done,

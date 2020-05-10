@@ -7,8 +7,8 @@ import 'package:mechapp/utils/type_constants.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
-//  WidgetsFlutterBinding.ensureInitialized();
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
   runApp(ChangeNotifierProvider(
     create: (context) => JobNotifier(),
@@ -86,26 +86,3 @@ class _MyWrapperState extends State<MyWrapper> {
         });
   }
 }
-
-/*
-Container(
-decoration: BoxDecoration(
-image: DecorationImage(
-image: AssetImage(
-"assets/images/app_back.jpg",
-),
-fit: BoxFit.fill),
-),
-child: Center(
-child: Container(
-width: MediaQuery.of(context).size.width,
-height: MediaQuery.of(context).size.height,
-decoration: BoxDecoration(
-image: DecorationImage(
-fit: BoxFit.fill,
-image: AssetImage("assets/images/app_back.jpg"),
-),
-),
-),
-),
-)*/
