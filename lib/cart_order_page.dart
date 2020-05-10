@@ -252,7 +252,7 @@ class _OrderNowPageState extends State<OrderNowPage>
                           fontWeight: FontWeight.bold,
                           color: Colors.black)),
                   Text(
-                      "\₦ ${(commaFormat.format(widget.total * 1.1).floor())}", //widget.totalValue.toStringAsFixed(2),
+                      "\₦ ${(commaFormat.format(widget.total * 1.1))}", //widget.totalValue.toStringAsFixed(2),
                       style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
