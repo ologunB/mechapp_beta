@@ -290,7 +290,7 @@ class _SignInPageState extends State<SignInPage> {
                                                                     });
                                                                     Navigator.pop(
                                                                         context);
-                                                                    showMiddleToast(
+                                                                    showCenterToast(
                                                                         "Reset Mail Sent",
                                                                         context);
                                                                   });

@@ -2,7 +2,9 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:mechapp/cart_order_page.dart';
 import 'package:mechapp/database/cart_model.dart';
+import 'package:mechapp/libraries/toast.dart';
 import 'package:mechapp/shop_fragment.dart';
 import 'package:mechapp/utils/type_constants.dart';
 
@@ -76,9 +78,6 @@ class MyCart extends StatefulWidget {
 class _MyCartState extends State<MyCart> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
-  List<Item> _data = [Item(isExpanded: false)];
-
-  List<Item> _data2 = [Item(isExpanded: false)];
 
   List<CartModel> cartItems, items;
   List<int> counters;
@@ -130,322 +129,226 @@ class _MyCartState extends State<MyCart> with AutomaticKeepAliveClientMixin {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ExpansionPanelList(
-                expansionCallback: (int index, bool isExpanded) {
-                  setState(() {
-                    _data[index].isExpanded = !isExpanded;
-                  });
-                },
-                children: _data.map<ExpansionPanel>((Item item) {
-                  return ExpansionPanel(
-                      headerBuilder: (BuildContext context, bool isExpanded) {
-                        return ListTile(
-                          title: Text(
-                            "Cart Items",
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
-                        );
-                      },
-                      body: FutureBuilder(
-                          future: getItems,
-                          builder: (context, snaps) {
-                            if (snaps.connectionState == ConnectionState.done) {
-                              items = snaps.data;
+        child: Container(
+          color: Colors.grey[200],
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: FutureBuilder(
+                    future: getItems,
+                    builder: (context, snaps) {
+                      if (snaps.connectionState == ConnectionState.done) {
+                        items = snaps.data;
 
-                              List.generate(items.length, (i) {
-                                counters.add(1);
-                              });
-                              return Container(
-                                color: Colors.grey[200],
-                                height: MediaQuery.of(context).size.height / 2,
-                                child: items.isEmpty
-                                    ? Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: <Widget>[
-                                          Text(
-                                            "Cart is empty, Go to shop",
-                                            style: TextStyle(fontSize: 18),
-                                          ),
-                                          Center(
-                                            child: CustomButton(
-                                              title: " SHOP ",
-                                              onPress: () {
-                                                Navigator.push(
-                                                    context,
-                                                    CupertinoPageRoute(
-                                                        builder: (context) =>
-                                                            ShopContainer(
-                                                                "cart")));
-                                              },
-                                              icon: Icon(
-                                                Icons.arrow_forward,
-                                                color: Colors.white,
+                        List.generate(items.length, (i) {
+                          counters.add(1);
+                        });
+                        return Container(
+                          child: items.isEmpty
+                              ? Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: <Widget>[
+                                    Text(
+                                      "Cart is empty, Go to shop",
+                                      style: TextStyle(fontSize: 18),
+                                    ),
+                                    Center(
+                                      child: CustomButton(
+                                        title: " SHOP ",
+                                        onPress: () {
+                                          Navigator.push(
+                                              context,
+                                              CupertinoPageRoute(
+                                                  builder: (context) =>
+                                                      ShopContainer("cart")));
+                                        },
+                                        icon: Icon(
+                                          Icons.arrow_forward,
+                                          color: Colors.white,
+                                        ),
+                                        iconLeft: false,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : ListView.builder(
+                                  itemCount: items.length,
+                                  shrinkWrap: true,
+                                  itemBuilder: (context, index) {
+                                    return Card(
+                                      child: Container(
+                                        width: double.infinity,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: <Widget>[
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(4.0),
+                                              child: Text(
+                                                items[index].name,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                    fontSize: 18,
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                               ),
-                                              iconLeft: false,
                                             ),
-                                          ),
-                                        ],
-                                      )
-                                    : ListView.builder(
-                                        itemCount: items.length,
-                                        shrinkWrap: true,
-                                        itemBuilder: (context, index) {
-                                          return Card(
-                                            child: Container(
-                                              width: double.infinity,
-                                              child: Column(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: <Widget>[
-                                                  Padding(
+                                            Row(
+                                              children: <Widget>[
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: CachedNetworkImage(
+                                                    imageUrl:
+                                                        items[index].image,
+                                                    height: 50,
+                                                    width: 50,
+                                                    placeholder: (context,
+                                                            url) =>
+                                                        CupertinoActivityIndicator(
+                                                      radius: 20,
+                                                    ),
+                                                    errorWidget:
+                                                        (context, url, error) =>
+                                                            Icon(Icons.error),
+                                                  ),
+                                                ),
+                                                Expanded(
+                                                  child: Padding(
                                                     padding:
-                                                        const EdgeInsets.all(
-                                                            4.0),
-                                                    child: Text(
-                                                      items[index].name,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                      style: TextStyle(
-                                                          fontSize: 18,
-                                                          fontWeight:
-                                                              FontWeight.bold),
+                                                        EdgeInsets.symmetric(
+                                                            horizontal: 8.0,
+                                                            vertical: 9),
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: <Widget>[
+                                                        Text(
+                                                          "By: ${items[index].seller}",
+                                                          style: TextStyle(
+                                                            fontSize: 17,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          "\₦ ${items[index].price}",
+                                                          style: TextStyle(
+                                                              fontSize: 18,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w900,
+                                                              color:
+                                                                  primaryColor),
+                                                        )
+                                                      ],
                                                     ),
                                                   ),
-                                                  Row(
-                                                    children: <Widget>[
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(8.0),
-                                                        child:
-                                                            CachedNetworkImage(
-                                                          imageUrl: items[index]
-                                                              .image,
-                                                          height: 50,
-                                                          width: 50,
-                                                          placeholder: (context,
-                                                                  url) =>
-                                                              CupertinoActivityIndicator(
-                                                            radius: 20,
-                                                          ),
-                                                          errorWidget: (context,
-                                                                  url, error) =>
-                                                              Icon(Icons.error),
-                                                        ),
-                                                      ),
-                                                      Expanded(
-                                                        child: Padding(
-                                                          padding: EdgeInsets
-                                                              .symmetric(
-                                                                  horizontal:
-                                                                      8.0,
-                                                                  vertical: 9),
-                                                          child: Column(
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .start,
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .center,
-                                                            children: <Widget>[
-                                                              Text(
-                                                                "By: ${items[index].seller}",
-                                                                style:
-                                                                    TextStyle(
-                                                                  fontSize: 17,
-                                                                ),
-                                                              ),
-                                                              Text(
-                                                                "\₦ ${items[index].price}",
-                                                                style: TextStyle(
-                                                                    fontSize:
-                                                                        18,
-                                                                    fontWeight:
-                                                                        FontWeight
-                                                                            .w900,
-                                                                    color:
-                                                                        primaryColor),
-                                                              )
-                                                            ],
+                                                ),
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(8.0),
+                                                  child: Align(
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .center,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: <Widget>[
+                                                        Align(
+                                                          alignment: Alignment
+                                                              .centerRight,
+                                                          child: IconButton(
+                                                            onPressed:
+                                                                () async {
+                                                              doDelete(index,
+                                                                  context);
+                                                            },
+                                                            icon: Icon(
+                                                              Icons.delete,
+                                                              color: Colors.red,
+                                                            ),
                                                           ),
                                                         ),
-                                                      ),
-                                                      Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .all(8.0),
-                                                        child: Align(
-                                                          child: Column(
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .center,
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .center,
-                                                            children: <Widget>[
-                                                              Align(
-                                                                alignment: Alignment
-                                                                    .centerRight,
-                                                                child:
-                                                                    IconButton(
-                                                                  onPressed:
-                                                                      () async {
-                                                                    doDelete(
-                                                                        index,
-                                                                        context);
-                                                                  },
-                                                                  icon: Icon(
-                                                                    Icons
-                                                                        .delete,
-                                                                    color: Colors
-                                                                        .red,
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                              Row(
-                                                                children: <
-                                                                    Widget>[
-                                                                  IconButton(
-                                                                    icon: Icon(
-                                                                        Icons
-                                                                            .remove_circle,
-                                                                        color: Colors
-                                                                            .black38),
-                                                                    onPressed:
-                                                                        () {
-                                                                      if (counters[
-                                                                              index] >
-                                                                          0) {
-                                                                        counters[
-                                                                            index]--;
+                                                        Row(
+                                                          children: <Widget>[
+                                                            IconButton(
+                                                              icon: Icon(
+                                                                  Icons
+                                                                      .remove_circle,
+                                                                  color: Colors
+                                                                      .black38),
+                                                              onPressed: () {
+                                                                if (counters[
+                                                                        index] >
+                                                                    1) {
+                                                                  counters[
+                                                                      index]--;
 
-                                                                        total = total -
-                                                                            double.parse(items[index].price);
-                                                                        setState(
-                                                                            () {});
-                                                                      }
-                                                                    },
-                                                                  ),
-                                                                  Text(
-                                                                    counters[
-                                                                            index]
-                                                                        .toString(),
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                            24,
-                                                                        color: Colors
-                                                                            .black38),
-                                                                  ),
-                                                                  IconButton(
-                                                                    icon: Icon(
-                                                                        Icons
-                                                                            .add_circle,
-                                                                        color: Colors
-                                                                            .deepPurple),
-                                                                    onPressed:
-                                                                        () {
-                                                                      if (counters[
-                                                                              index] <
-                                                                          10) {
-                                                                        counters[
-                                                                            index]++;
-                                                                        total = total +
-                                                                            double.parse(items[index].price);
-                                                                        setState(
-                                                                            () {});
-                                                                      }
-                                                                    },
-                                                                  ),
-                                                                ],
-                                                              )
-                                                            ],
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                          );
-                                        }),
-                              );
-                            }
-                            return Container();
-                          }),
-                      isExpanded: item.isExpanded,
-                      canTapOnHeader: true);
-                }).toList(),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: ExpansionPanelList(
-                expansionCallback: (int index, bool isExpanded) {
-                  setState(() {
-                    _data2[index].isExpanded = !isExpanded;
-                  });
-                },
-                children: _data2.map<ExpansionPanel>((Item item) {
-                  return ExpansionPanel(
-                      headerBuilder: (BuildContext context, bool isExpanded) {
-                        return ListTile(
-                          title: Text(
-                            "Local Address",
-                            style: TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
-                          ),
+                                                                  total = total -
+                                                                      double.parse(
+                                                                          items[index]
+                                                                              .price);
+                                                                  setState(
+                                                                      () {});
+                                                                }
+                                                              },
+                                                            ),
+                                                            Text(
+                                                              counters[index]
+                                                                  .toString(),
+                                                              style: TextStyle(
+                                                                  fontSize: 24,
+                                                                  color: Colors
+                                                                      .black38),
+                                                            ),
+                                                            IconButton(
+                                                              icon: Icon(
+                                                                  Icons
+                                                                      .add_circle,
+                                                                  color: Colors
+                                                                      .deepPurple),
+                                                              onPressed: () {
+                                                                if (counters[
+                                                                        index] <
+                                                                    10) {
+                                                                  counters[
+                                                                      index]++;
+                                                                  total = total +
+                                                                      double.parse(
+                                                                          items[index]
+                                                                              .price);
+                                                                  setState(
+                                                                      () {});
+                                                                }
+                                                              },
+                                                            ),
+                                                          ],
+                                                        )
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  }),
                         );
-                      },
-                      body: Column(
-                        children: <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: CupertinoTextField(
-                              placeholder: "Street Address",
-                              style: TextStyle(fontSize: 20),
-                            ),
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: CupertinoTextField(
-                                    placeholder: "Phone Number",
-                                    style: TextStyle(fontSize: 20),
-                                    keyboardType: TextInputType.number,
-                                  ),
-                                ),
-                              ),
-                              Expanded(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: CupertinoTextField(
-                                    placeholder: "Zip code",
-                                    style: TextStyle(fontSize: 20),
-                                    keyboardType: TextInputType.number,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      isExpanded: item.isExpanded,
-                      canTapOnHeader: true);
-                }).toList(),
+                      }
+                      return Container();
+                    }),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
       bottomNavigationBar: Card(
@@ -456,40 +359,16 @@ class _MyCartState extends State<MyCart> with AutomaticKeepAliveClientMixin {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              Text(
-                "Sub-Total",
-                style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black),
-              ),
-              Text("\₦ ${total}", //widget.totalValue.toStringAsFixed(2),
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.indigo)),
-              Text("Charge and Delivery",
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black)),
-              Text(
-                  "\₦ ${total.ceil() * 0.1}", //widget.totalValue.toStringAsFixed(2),
-                  style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.indigo)),
-              Divider(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Text("Total",
+                  Text("All",
                       style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: Colors.black)),
                   Text(
-                      "\₦ ${(total * 1.1).floor()}", //widget.totalValue.toStringAsFixed(2),
+                      "\₦ ${total.floor()}", //widget.totalValue.toStringAsFixed(2),
                       style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -498,9 +377,20 @@ class _MyCartState extends State<MyCart> with AutomaticKeepAliveClientMixin {
               ),
               Center(
                 child: CustomButton(
-                  title: "   PLACE TO ORDER   ",
+                  title: "    ORDER NOW   ",
                   onPress: () {
-                    showToast(counters.toString(), context);
+                    if (items.isEmpty) {
+                      Toast.show("Cart is empty, Go to Shop", context,
+                          gravity: Toast.CENTER, duration: Toast.LENGTH_LONG);
+                      return;
+                    }
+                    Navigator.push(
+                        context,
+                        CupertinoPageRoute(
+                            builder: (context) => OrderNowPage(
+                                total: total,
+                                items: items,
+                                counters: counters)));
                   },
                   icon: Icon(
                     Icons.arrow_forward,
@@ -723,10 +613,4 @@ class _CartHistoryState extends State<CartHistory>
           return CupertinoActivityIndicator(radius: 20);
         });
   }
-}
-
-class Item {
-  Item({this.isExpanded = false});
-
-  bool isExpanded;
 }

@@ -146,7 +146,7 @@ class _HomeFragmentState extends State<HomeFragment> {
         });
       }
     } else {
-      showMiddleToast("Geting mechanics", context);
+      showCenterToast("Geting mechanics", context);
     }
   }
 

@@ -86,7 +86,7 @@ showToast(String aa, BuildContext context) {
   return;
 }
 
-showMiddleToast(String aa, BuildContext context) {
+showCenterToast(String aa, BuildContext context) {
   Toast.show("$aa", context,
       duration: Toast.LENGTH_LONG, gravity: Toast.CENTER);
   return;
@@ -106,3 +106,5 @@ String randomString() {
 String thePresentTime() {
   return DateFormat("MMM d, yyyy HH:mm:ss a").format(DateTime.now());
 }
+
+final commaFormat = new NumberFormat("#,##0", "en_US");

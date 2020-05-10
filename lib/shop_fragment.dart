@@ -59,7 +59,7 @@ void onSearchProduct(String val, BuildContext context, setState) {
       });
     }
   } else {
-    showMiddleToast("Geting items", context);
+    showCenterToast("Geting items", context);
   }
 }
 
