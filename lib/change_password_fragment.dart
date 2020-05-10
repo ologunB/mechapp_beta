@@ -155,7 +155,6 @@ class _ChangePasswordFState extends State<ChangePasswordF> {
                               }
                               _changePassword(new1Pass.text.toString());
                               CupertinoActivityIndicator(radius: 20);
-                              ;
                             },
                       icon: isLoading
                           ? CupertinoActivityIndicator(radius: 20)

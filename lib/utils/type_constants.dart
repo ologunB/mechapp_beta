@@ -108,3 +108,5 @@ String thePresentTime() {
 }
 
 final commaFormat = new NumberFormat("#,##0", "en_US");
+String raveEncryptKey = "FLWSECK_TEST3ba765b74b1f";
+String ravePublicKey = "FLWPUBK_TEST-9ba09916a6e4e8385b9fb2036439beac-X";

@@ -2,11 +2,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mechapp/libraries/custom_button.dart';
-import 'package:mechapp/libraries/toast.dart';
+import 'package:mechapp/mechanic/mech_main.dart';
 import 'package:mechapp/utils/type_constants.dart';
-
-var rootRef = FirebaseDatabase.instance.reference();
-String t5 = "--", t8 = "--";
+import 'package:rave_flutter/rave_flutter.dart';
 
 class MechMakePayment extends StatefulWidget {
   @override
@@ -14,6 +12,9 @@ class MechMakePayment extends StatefulWidget {
 }
 
 class _MechMakePaymentState extends State<MechMakePayment> {
+  String t5 = "--", t8 = "--";
+  var rootRef = FirebaseDatabase.instance.reference();
+
   Future getJobs() async {
     DatabaseReference dataRef = FirebaseDatabase.instance
         .reference()
@@ -23,10 +24,10 @@ class _MechMakePaymentState extends State<MechMakePayment> {
     await dataRef.once().then((snapshot) {
       var dATA = snapshot.value;
 
-      setState(() async {
-        t5 = dATA['Cash Payment Debt'];
-        t8 = dATA['Completed Amount'];
-      });
+      //  setState(() async {
+      t5 = dATA['Cash Payment Debt'];
+      t8 = dATA['Completed Amount'];
+      // });
     });
   }
 
@@ -54,9 +55,12 @@ class _MechMakePaymentState extends State<MechMakePayment> {
                     SizedBox(height: 20),
                     CustomButton(
                       onPress: () {
-                        Toast.show("Make Payment bar open!", context,
-                            duration: Toast.LENGTH_SHORT,
-                            gravity: Toast.BOTTOM);
+                        if (double.parse(t5) < 500) {
+                          showCenterToast(
+                              "You can't pay less than 500 naira", context);
+                          return;
+                        }
+                        processOrder(context);
                       },
                       title: "PAY ADMIN   ",
                       iconLeft: false,
@@ -76,6 +80,70 @@ class _MechMakePaymentState extends State<MechMakePayment> {
     );
   }
 
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+  void processOrder(context) async {
+    var initializer = RavePayInitializer(
+        amount: double.parse(t5),
+        publicKey: ravePublicKey,
+        encryptionKey: raveEncryptKey)
+      ..country = "NG"
+      ..currency = "NGN"
+      ..email = mEmail
+      ..fName = mName
+      ..lName = "lName"
+      ..narration = "FABAT MANAGEMENT"
+      ..txRef = "SCH${DateTime.now().millisecondsSinceEpoch}"
+      ..acceptAccountPayments = false
+      ..acceptCardPayments = true
+      ..acceptAchPayments = false
+      ..acceptGHMobileMoneyPayments = false
+      ..acceptUgMobileMoneyPayments = false
+      ..staging = true
+      ..isPreAuth = true
+      ..displayFee = true;
+
+    RavePayManager()
+        .prompt(context: context, initializer: initializer)
+        .then((result) {
+      if (result.status == RaveStatus.success) {
+        doAfterSuccess(result.message);
+      } else if (result.status == RaveStatus.cancelled) {
+        if (mounted) {
+          scaffoldKey.currentState.showSnackBar(
+            SnackBar(
+              content: Text(
+                "Closed!",
+                style: TextStyle(color: Colors.white, fontSize: 18),
+              ),
+              backgroundColor: primaryColor,
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
+      } else if (result.status == RaveStatus.error) {
+        showDialog(
+            context: context,
+            builder: (_) {
+              return AlertDialog(
+                title: Text(
+                  "Error",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.red, fontSize: 20),
+                ),
+                content: Text(
+                  "An error has occured ",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 18),
+                ),
+              );
+            });
+      }
+
+      print(result);
+    });
+  }
+
   void doAfterSuccess(String serverData) {
     final String ppA = "0";
     final String cA = ((double.parse(t8) * 5) + double.parse(t5)).toString();
@@ -90,21 +158,42 @@ class _MechMakePaymentState extends State<MechMakePayment> {
     final Map<String, String> sentMessage = Map();
     sentMessage.putIfAbsent("notification_message", () => made);
     sentMessage.putIfAbsent("notification_time", () => thePresentTime());
-
+    showCupertinoDialog(
+        context: context,
+        builder: (_) {
+          return CupertinoAlertDialog(
+            title: Text(
+              "Finishing processing",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.red, fontSize: 20),
+            ),
+            content: CupertinoActivityIndicator(radius: 20),
+          );
+        });
     rootRef
         .child("Notification Collection")
         .child("Mechanic")
         .child(mUID)
         .child(mUID)
-        .set(sentMessage);
-
-    rootRef.child("All Jobs Collection").child(mUID).update(allJobs);
-
-    showToast("Payment Complete", context);
+        .set(sentMessage)
+        .then((a) {
+      rootRef
+          .child("All Jobs Collection")
+          .child(mUID)
+          .update(allJobs)
+          .then((a) {
+        showToast("Payment Complete", context);
+        Navigator.pushReplacement(
+            context, CupertinoPageRoute(builder: (context) => MechMainPage()));
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(color: Color(0xb090A1AE), child: _buildFutureBuilder());
+    return Scaffold(
+      key: scaffoldKey,
+      body: Container(color: Color(0xb090A1AE), child: _buildFutureBuilder()),
+    );
   }
 }

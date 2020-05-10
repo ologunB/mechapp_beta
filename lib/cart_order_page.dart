@@ -9,7 +9,6 @@ import 'package:rave_flutter/rave_flutter.dart';
 import 'database/database.dart';
 import 'libraries/custom_button.dart';
 import 'libraries/order_confirmed.dart';
-import 'libraries/toast.dart';
 
 class OrderNowPage extends StatefulWidget {
   double total;
@@ -44,6 +43,11 @@ class _OrderNowPageState extends State<OrderNowPage>
           "Preview Order",
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
+        leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios),
+            onPressed: () {
+              Navigator.pop(context);
+            }),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -53,9 +57,11 @@ class _OrderNowPageState extends State<OrderNowPage>
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: <Widget>[
-                  ListTile(
-                    title: Text(
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
                       "Local Address",
                       style:
                           TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
@@ -64,7 +70,7 @@ class _OrderNowPageState extends State<OrderNowPage>
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: CupertinoTextField(
-                      padding: EdgeInsets.all(5),
+                      padding: EdgeInsets.all(8),
                       placeholder: "Street Address",
                       controller: streetController,
                       style: TextStyle(fontSize: 20),
@@ -78,7 +84,7 @@ class _OrderNowPageState extends State<OrderNowPage>
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: CupertinoTextField(
-                            padding: EdgeInsets.all(5),
+                            padding: EdgeInsets.all(8),
                             controller: phoneNumberController,
                             placeholder: "Phone Number",
                             style: TextStyle(fontSize: 20),
@@ -90,11 +96,10 @@ class _OrderNowPageState extends State<OrderNowPage>
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: CupertinoTextField(
-                            padding: EdgeInsets.all(5),
+                            padding: EdgeInsets.all(8),
                             controller: zipController,
-                            placeholder: "Zip code",
+                            placeholder: "City/Town",
                             style: TextStyle(fontSize: 20),
-                            keyboardType: TextInputType.number,
                           ),
                         ),
                       ),
@@ -288,8 +293,8 @@ class _OrderNowPageState extends State<OrderNowPage>
   void processOrder(context) async {
     var initializer = RavePayInitializer(
         amount: widget.total * 1.1,
-        publicKey: "FLWPUBK_TEST-9ba09916a6e4e8385b9fb2036439beac-X",
-        encryptionKey: "FLWSECK_TEST3ba765b74b1f")
+        publicKey: ravePublicKey,
+        encryptionKey: raveEncryptKey)
       ..country = "NG"
       ..currency = "NGN"
       ..email = mEmail
@@ -309,9 +314,6 @@ class _OrderNowPageState extends State<OrderNowPage>
     RavePayManager()
         .prompt(context: context, initializer: initializer)
         .then((result) {
-      Toast.show("err", context,
-          gravity: Toast.TOP, duration: Toast.LENGTH_LONG);
-
       if (result.status == RaveStatus.success) {
         doAfterSuccess(result.message);
       } else if (result.status == RaveStatus.cancelled) {
@@ -338,7 +340,7 @@ class _OrderNowPageState extends State<OrderNowPage>
                   style: TextStyle(color: Colors.red, fontSize: 20),
                 ),
                 content: Text(
-                  "An error has occured ",
+                  "An error has occured, Try again ",
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 18),
                 ),
@@ -364,13 +366,15 @@ class _OrderNowPageState extends State<OrderNowPage>
           .add(widget.items[i].name + "_" + widget.counters[i].toString());
       productListImages.add(widget.items[i].image);
       productListSellers.add(widget.items[i].seller);
+      numberOfCartItems.add(widget.counters[i]);
     }
 
     final String uid = mUID;
 
     final Map<String, Object> valuesToCustomer = Map();
     valuesToCustomer.putIfAbsent("Customer Name", () => mName);
-    valuesToCustomer.putIfAbsent("Customer Number", () => "MY_NUMB");
+    valuesToCustomer.putIfAbsent(
+        "Customer Number", () => phoneNumberController.text);
     valuesToCustomer.putIfAbsent("Customer Email", () => mEmail);
     valuesToCustomer.putIfAbsent("Customer Uid", () => uid);
     valuesToCustomer.putIfAbsent("Product List", () => productListName);
@@ -380,8 +384,8 @@ class _OrderNowPageState extends State<OrderNowPage>
     valuesToCustomer.putIfAbsent(
         "Total Amount Paid", () => (widget.total * 1.1).floor().toString());
     valuesToCustomer.putIfAbsent("Street Address", () => streetController.text);
-    valuesToCustomer.putIfAbsent("City", () => "CITY");
-    valuesToCustomer.putIfAbsent("Trans Time", () => thePresentTime);
+    valuesToCustomer.putIfAbsent("City", () => zipController.text);
+    valuesToCustomer.putIfAbsent("Trans Time", () => thePresentTime());
     valuesToCustomer.putIfAbsent("Server Confirmation", () => serverData);
     valuesToCustomer.putIfAbsent(
         "Trans Description", () => "Payment for Items");
@@ -399,7 +403,7 @@ class _OrderNowPageState extends State<OrderNowPage>
     showCupertinoDialog(
         context: context,
         builder: (_) {
-          return AlertDialog(
+          return CupertinoAlertDialog(
             title: Text(
               "Finishing processing",
               textAlign: TextAlign.center,
@@ -436,10 +440,9 @@ class _OrderNowPageState extends State<OrderNowPage>
         });
       });
     });
-
     final database =
         await $FloorAppDatabase.databaseBuilder('flutter_database.db').build();
-    database.cartDao.getItems();
+    database.cartDao.deleteAllItems();
   }
 }
 

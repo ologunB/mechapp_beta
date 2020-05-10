@@ -17,6 +17,7 @@ import 'package:mechapp/shop_fragment.dart';
 import 'package:mechapp/utils/type_constants.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'database/database.dart';
 import 'main_cart.dart';
 
 class CusMainPage extends StatefulWidget {
@@ -192,7 +193,11 @@ class _CusMainPageState extends State<CusMainPage> {
                       context: context,
                       builder: (_) => CustomDialog(
                         title: "Are you sure you want to log out?",
-                        onClicked: () {
+                        onClicked: () async {
+                          final database = await $FloorAppDatabase
+                              .databaseBuilder('flutter_database.db')
+                              .build();
+                          database.cartDao.deleteAllItems();
                           FirebaseAuth.instance.signOut();
                           Navigator.pop(context);
                           Navigator.of(context).pushReplacement(

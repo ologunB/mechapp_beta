@@ -11,10 +11,8 @@ abstract class MyCartDao {
   Future<void> insertItem(CartModel cartModel);
 
   @Query('DELETE FROM CartItems')
-  Future<void> deleteAllItems(); // query without returning an entity
+  Future<void> deleteAllItems();
 
   @delete
-  Future<void> deleteOneItem(
-      CartModel cartModel); // query without returning an entity
-
+  Future<void> deleteOneItem(CartModel cartModel);
 }

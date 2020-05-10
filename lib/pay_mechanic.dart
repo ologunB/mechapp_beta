@@ -133,8 +133,8 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
   processTransaction(context) async {
     var initializer = RavePayInitializer(
         amount: double.parse(amountController.text),
-        publicKey: "FLWPUBK_TEST-9ba09916a6e4e8385b9fb2036439beac-X",
-        encryptionKey: "FLWSECK_TEST3ba765b74b1f")
+        publicKey: ravePublicKey,
+        encryptionKey: raveEncryptKey)
       ..country = "NG"
       ..currency = "NGN"
       ..email = mEmail
@@ -272,6 +272,7 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
     receivedMessage.putIfAbsent("notification_message", () => received);
     receivedMessage.putIfAbsent("notification_time", () => now);
 
+    showCenterToast("yes pres", context);
     showCupertinoDialog(
         context: context,
         builder: (_) {

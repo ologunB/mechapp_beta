@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mechapp/cus_main.dart';
@@ -452,7 +453,42 @@ class _CusSignUpState extends State<CusSignUp> {
               .child(user.uid)
               .set(mData)
               .then((b) {
-            showToast("User created, Verify Email!", context);
+            showCupertinoDialog(
+                context: context,
+                builder: (_) {
+                  return CupertinoAlertDialog(
+                    title: Text(
+                      "User created, Verify Email!",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.black, fontSize: 20),
+                    ),
+                    actions: <Widget>[
+                      Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(5.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(50),
+                                color: primaryColor),
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text(
+                                "OK",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                });
             setState(() {
               isLoading = false;
             });
@@ -621,8 +657,48 @@ class MechSignUp extends StatefulWidget {
 
 class _MechSignUpState extends State<MechSignUp> {
   bool isLoading = false;
-  double theLong, theLat;
 
+  List<bool> _specifyBoolList = [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+  ];
+
+  List<bool> _categoryBoolList = [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+  ];
   File _mainPicture, _previous1, _previous2, _cacImage;
   TextEditingController _upSpecify = TextEditingController();
   TextEditingController _upCategory = TextEditingController();
@@ -636,72 +712,60 @@ class _MechSignUpState extends State<MechSignUp> {
   TextEditingController _upWebsite = TextEditingController();
   TextEditingController _upDescpt = TextEditingController();
 
-  Future cusSignUp(String email, String password) async {
+  Future mechSignUp() async {
     setState(() {
       isLoading = true;
     });
-    _firebaseAuth
-        .createUserWithEmailAndPassword(email: email, password: password)
+
+    var _storageRef = FirebaseStorage.instance.ref();
+
+    List<String> specTempList = [];
+    int intA = 0;
+    for (bool item in _specifyBoolList) {
+      if (item == true) {
+        specTempList.add(specifyList[intA]);
+      }
+      intA++;
+    }
+
+    List<String> cateTempList = [];
+    int intB = 0;
+    for (bool item in _categoryBoolList) {
+      if (item == true) {
+        cateTempList.add(categoryList[intB]);
+      }
+      intB++;
+    }
+    await _firebaseAuth
+        .createUserWithEmailAndPassword(
+            email: _upEmail.text, password: _upPass.text)
         .then((value) {
       FirebaseUser user = value.user;
 
       if (value.user != null) {
-        if (_upDescpt.text.isEmpty) {
-          _upDescpt.text = "empty";
-        }
-        if (_upWebsite.text.isEmpty) {
-          _upWebsite.text = "No Url";
-        }
-
-        String sample =
-            "https://firebasestorage.googleapis.com/v0/b/mechanics-b3612.appspot.com/o/photos%2Fimage%3A55039?alt=media&token=e25a7e4c-fa06-452a-b630-2b89bae6f7b4";
-
-        String p1, p2;
-
-        if (_previous1 == null) {
-          p1 = sample;
-        }
-        if (_previous2 == null) {
-          p2 = sample;
-        }
-
-        user.sendEmailVerification().then((verify) {
-          List<String> specTempList = [];
-          int intA = 0;
-          for (bool item in _specifyBoolList) {
-            if (item == true) {
-              specTempList.add(specifyList[intA]);
-            }
-            intA++;
-          }
-
-          List<String> catTempList = [];
-          int intB = 0;
-          for (bool item in _categoryBoolList) {
-            if (item == true) {
-              catTempList.add(categoryList[intB]);
-            }
-            intB++;
-          }
+        user.sendEmailVerification().then((verify) async {
+          var rootRef = FirebaseDatabase.instance
+              .reference()
+              .child("Mechanic Collection")
+              .child(user.uid);
 
           Map<String, Object> m = Map();
           m.putIfAbsent("Company Name", () => _upName.text);
           m.putIfAbsent("Specifications", () => specTempList);
-          m.putIfAbsent("Categories", () => catTempList);
+          m.putIfAbsent("Categories", () => cateTempList);
           m.putIfAbsent("Phone Number", () => _upPhoneNo.text);
-          m.putIfAbsent("Email", () => _upEmail);
-          // m.putIfAbsent("Password", () => Password);
+          m.putIfAbsent("Email", () => _upEmail.text);
           m.putIfAbsent("Street Name", () => _upStreetName.text);
           m.putIfAbsent("City", () => _upCity.text);
           m.putIfAbsent("Locality", () => _upLocality.text);
           m.putIfAbsent("Description", () => _upDescpt.text);
           m.putIfAbsent("Website Url", () => _upWebsite.text);
-          m.putIfAbsent("Loc Latitude", () => theLat);
-          m.putIfAbsent("LOc Longitude", () => theLong);
-          //    m.putIfAbsent("Image Url", () => downloadUrl1);
-          //    m.putIfAbsent("CAC Image Url", () => downloadUri4);
-          m.putIfAbsent("PreviousImage1 Url", () => p1);
-          m.putIfAbsent("PreviousImage2 Url", () => p2);
+          m.putIfAbsent("Loc Latitude", () => currentLocation.latitude);
+          m.putIfAbsent("LOc Longitude", () => currentLocation.longitude);
+          m.putIfAbsent("Image Url", () => "em");
+          m.putIfAbsent("CAC Image Url", () => "em");
+          m.putIfAbsent("PreviousImage1 Url", () => "em");
+          m.putIfAbsent("PreviousImage2 Url", () => "em");
           m.putIfAbsent("Bank Account Name", () => "");
           m.putIfAbsent("Bank Account Number", () => "");
           m.putIfAbsent("Bank Name", () => "");
@@ -710,6 +774,7 @@ class _MechSignUpState extends State<MechSignUp> {
           m.putIfAbsent("Rating", () => "0.00");
           m.putIfAbsent("Reviews", () => "0");
           m.putIfAbsent("Mech Uid", () => user.uid);
+
           Map<String, String> allJobs = Map();
           allJobs.putIfAbsent("Total Job", () => "0");
           allJobs.putIfAbsent("Total Amount", () => "0");
@@ -725,21 +790,120 @@ class _MechSignUpState extends State<MechSignUp> {
               .document(user.uid)
               .setData(m);
           Firestore.instance.collection("All").document(user.uid).setData(m);
-
-          _dataRef.child("Mechanic Collection").child(user.uid).set(m);
-
           _dataRef
-              .child("All Jobs Collection")
+              .child("Mechanic Collection")
               .child(user.uid)
-              .set(allJobs)
+              .set(m)
               .then((b) {
-            showToast("User created, Verify Email!", context);
-            setState(() {
-              isLoading = false;
+            _dataRef
+                .child("All Jobs Collection")
+                .child(user.uid)
+                .set(allJobs)
+                .then((a) {
+              showCupertinoDialog(
+                  context: context,
+                  builder: (_) {
+                    return CupertinoAlertDialog(
+                      title: Text(
+                        "User created, Verify Email!",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.black, fontSize: 20),
+                      ),
+                      actions: <Widget>[
+                        /* Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(5.0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(50),
+                                  color: primaryColor),
+                              child: FlatButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text(
+                                  "OK",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w900,
+                                      color: Colors.white),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),*/
+                      ],
+                    );
+                  });
+              setState(() {
+                isLoading = false;
+              });
+              _tabController.animateTo(0);
             });
-            _tabController.animateTo(0);
-            _firebaseAuth.signOut();
           });
+
+          if (_mainPicture != null) {
+            StorageReference reference =
+                _storageRef.child("images/${randomString()}");
+
+            StorageUploadTask uploadTask = reference.putFile(_mainPicture);
+            StorageTaskSnapshot downloadUrl = (await uploadTask.onComplete);
+            String url = (await downloadUrl.ref.getDownloadURL());
+
+            rootRef.update({"Image Url": url});
+
+            Firestore.instance
+                .collection("All")
+                .document(mUID)
+                .updateData({"Image Url": url});
+          }
+
+          if (_previous2 != null) {
+            StorageReference reference =
+                _storageRef.child("images/${randomString()}");
+
+            StorageUploadTask uploadTask = reference.putFile(_previous2);
+            StorageTaskSnapshot downloadUrl = (await uploadTask.onComplete);
+            String url = (await downloadUrl.ref.getDownloadURL());
+
+            rootRef.update({"PreviousImage2 Url": url});
+
+            Firestore.instance
+                .collection("All")
+                .document(mUID)
+                .updateData({"PreviousImage2 Url": url});
+          }
+          if (_cacImage != null) {
+            StorageReference reference =
+                _storageRef.child("images/${randomString()}");
+
+            StorageUploadTask uploadTask = reference.putFile(_cacImage);
+            StorageTaskSnapshot downloadUrl = (await uploadTask.onComplete);
+            String url = (await downloadUrl.ref.getDownloadURL());
+
+            rootRef.update({"CAC Image Url": url});
+
+            Firestore.instance
+                .collection("All")
+                .document(mUID)
+                .updateData({"CAC Image Url": url});
+          }
+          if (_previous1 != null) {
+            StorageReference reference =
+                _storageRef.child("images/${randomString()}");
+
+            StorageUploadTask uploadTask = reference.putFile(_previous1);
+            StorageTaskSnapshot downloadUrl = (await uploadTask.onComplete);
+            String url = (await downloadUrl.ref.getDownloadURL());
+
+            rootRef.update({"PreviousImage1 Url": url});
+
+            Firestore.instance
+                .collection("All")
+                .document(mUID)
+                .updateData({"PreviousImage1 Url": url});
+          }
         });
       } else {
         setState(() {
@@ -791,274 +955,72 @@ class _MechSignUpState extends State<MechSignUp> {
                     specifyList),
                 NotiAndCategory(
                     _upCategory, _categoryBoolList, "Category", categoryList),
-                /*       Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Expanded(
-                      child: TextField(
-                        decoration:
-                            InputDecoration(hintText: "Choose Specification"),
-                        style: TextStyle(fontSize: 18),
-                        readOnly: true,
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (_) => CupertinoAlertDialog(
-                              title: Text(
-                                "Choose Specification",
-                                style: TextStyle(fontSize: 20),
-                              ),
-                              content: Container(
-                                height: MediaQuery.of(context).size.height / 2,
-                                child: ListView.builder(
-                                  itemCount: specifyList.length,
-                                  itemBuilder: (context, index) {
-                                    return Padding(
-                                        padding: EdgeInsets.all(5.0),
-                                        child: Material(
-                                            child: StatefulBuilder(
-                                          builder: (context, _setState) =>
-                                              CheckboxListTile(
-                                            title: Text(
-                                              specifyList[index],
-                                              textAlign: TextAlign.left,
-                                              style: TextStyle(fontSize: 18),
-                                            ),
-                                            value: _specifyBoolList[index],
-                                            onChanged: (e) {
-                                              _setState(
-                                                () {
-                                                  if (_specifyBoolList[index]) {
-                                                    _specifyBoolList[index] =
-                                                        !_specifyBoolList[
-                                                            index];
-                                                  } else {
-                                                    _specifyBoolList[index] =
-                                                        !_specifyBoolList[
-                                                            index];
-                                                  }
-                                                },
-                                              );
-                                            },
-                                          ),
-                                        )));
-                                  },
-                                ),
-                              ),
-                              actions: <Widget>[
-                                Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(5.0),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(50),
-                                          color: Colors.red),
-                                      child: FlatButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: <Widget>[
-                                            Icon(
-                                              Icons.close,
-                                              color: Colors.white,
-                                            ),
-                                            Text(
-                                              "Cancel",
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.w900,
-                                                  color: Colors.white),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                CustomButton(
-                                  title: "OK",
-                                  onPress: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  icon: Icon(
-                                    Icons.done,
-                                    color: Colors.white,
-                                  ),
-                                  iconLeft: false,
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    Icon(
-                      Icons.unfold_more,
-                      color: primaryColor,
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    Expanded(
-                      child: TextField(
-                        decoration:
-                            InputDecoration(hintText: "Choose Category"),
-                        style: TextStyle(fontSize: 18),
-                        readOnly: true,
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (_) => CupertinoAlertDialog(
-                              title: Text(
-                                "Choose Category",
-                                style: TextStyle(fontSize: 20),
-                              ),
-                              content: Container(
-                                height: MediaQuery.of(context).size.height / 2,
-                                child: ListView.builder(
-                                  itemCount: categoryList.length,
-                                  itemBuilder: (context, index) {
-                                    return Padding(
-                                        padding: EdgeInsets.all(5.0),
-                                        child: Material(
-                                            child: StatefulBuilder(
-                                          builder: (context, _setState) =>
-                                              CheckboxListTile(
-                                            title: Text(
-                                              categoryList[index],
-                                              textAlign: TextAlign.left,
-                                              style: TextStyle(fontSize: 18),
-                                            ),
-                                            value: _categoryBoolList[index],
-                                            onChanged: (e) {
-                                              _setState(
-                                                () {
-                                                  if (_categoryBoolList[
-                                                      index]) {
-                                                    _categoryBoolList[index] =
-                                                        !_categoryBoolList[
-                                                            index];
-                                                  } else {
-                                                    _categoryBoolList[index] =
-                                                        !_categoryBoolList[
-                                                            index];
-                                                  }
-                                                },
-                                              );
-                                            },
-                                          ),
-                                        )));
-                                  },
-                                ),
-                              ),
-                              actions: <Widget>[
-                                Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(5.0),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(50),
-                                          color: Colors.red),
-                                      child: FlatButton(
-                                        onPressed: () {
-                                          Navigator.of(context).pop();
-                                        },
-                                        child: Row(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: <Widget>[
-                                            Icon(
-                                              Icons.close,
-                                              color: Colors.white,
-                                            ),
-                                            Text(
-                                              "Cancel",
-                                              textAlign: TextAlign.center,
-                                              style: TextStyle(
-                                                  fontSize: 20,
-                                                  fontWeight: FontWeight.w900,
-                                                  color: Colors.white),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                CustomButton(
-                                  title: "OK",
-                                  onPress: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  icon: Icon(
-                                    Icons.done,
-                                    color: Colors.white,
-                                  ),
-                                  iconLeft: false,
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    Icon(
-                      Icons.unfold_more,
-                      color: primaryColor,
-                    ),
-                  ],
-                ),*/
                 TextField(
-                  decoration: InputDecoration(hintText: "Company Name"),
+                  decoration: InputDecoration(
+                      hintText: "Company Name",
+                      labelText: "Company Name",
+                      labelStyle: TextStyle(color: Colors.blue)),
                   style: TextStyle(fontSize: 18),
                   controller: _upName,
                 ),
                 TextField(
-                  decoration: InputDecoration(hintText: "Phone Number"),
+                  decoration: InputDecoration(
+                      hintText: "Phone Number",
+                      labelText: "Phone Number",
+                      labelStyle: TextStyle(color: Colors.blue)),
                   controller: _upPhoneNo,
                   style: TextStyle(fontSize: 18),
                   keyboardType: TextInputType.number,
                 ),
                 TextField(
-                  decoration: InputDecoration(hintText: "Email"),
+                  decoration: InputDecoration(
+                      hintText: "Email",
+                      labelText: "Email",
+                      labelStyle: TextStyle(color: Colors.blue)),
                   controller: _upEmail,
                   style: TextStyle(fontSize: 18),
                   keyboardType: TextInputType.emailAddress,
                 ),
                 TextField(
-                  decoration: InputDecoration(hintText: "Password"),
-                  controller: _upEmail,
+                  decoration: InputDecoration(
+                      hintText: "Password",
+                      labelText: "Password",
+                      labelStyle: TextStyle(color: Colors.blue)),
+                  controller: _upPass,
                   style: TextStyle(fontSize: 18),
+                  obscureText: true,
                   keyboardType: TextInputType.visiblePassword,
                 ),
-                GetLocationFromAddress(
-                  theLat: theLat,
-                  theLong: theLong,
-                  upStreetName: _upStreetName,
-                ),
+                GetLocationFromAddress(upStreetName: _upStreetName),
                 TextField(
-                  decoration: InputDecoration(hintText: "City"),
+                  decoration: InputDecoration(
+                      hintText: "City",
+                      labelText: "City",
+                      labelStyle: TextStyle(color: Colors.blue)),
                   style: TextStyle(fontSize: 18),
                   controller: _upCity,
                 ),
                 TextField(
-                  decoration: InputDecoration(hintText: "Locality"),
+                  decoration: InputDecoration(
+                      hintText: "Locality",
+                      labelText: "Locality",
+                      labelStyle: TextStyle(color: Colors.blue)),
                   style: TextStyle(fontSize: 18),
                   controller: _upLocality,
                 ),
                 TextField(
-                  decoration: InputDecoration(hintText: "Company's website"),
+                  decoration: InputDecoration(
+                      hintText: "Company's website",
+                      labelText: "Company's website",
+                      labelStyle: TextStyle(color: Colors.blue)),
                   style: TextStyle(fontSize: 18),
                   controller: _upWebsite,
                 ),
                 TextField(
-                  decoration: InputDecoration(hintText: "Description"),
+                  decoration: InputDecoration(
+                      hintText: "Description",
+                      labelText: "Description",
+                      labelStyle: TextStyle(color: Colors.blue)),
                   style: TextStyle(fontSize: 18),
                   controller: _upDescpt,
                 ),
@@ -1137,6 +1099,7 @@ class _MechSignUpState extends State<MechSignUp> {
                             } else if (_mainPicture == null) {
                               showEmptyToast("Image", context);
                             }
+                            mechSignUp();
                           },
                     icon: isLoading
                         ? CupertinoActivityIndicator(radius: 20)
@@ -1157,45 +1120,3 @@ class _MechSignUpState extends State<MechSignUp> {
     );
   }
 }
-
-List<bool> _specifyBoolList = [
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false
-];
-
-List<bool> _categoryBoolList = [
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false,
-  false
-];
