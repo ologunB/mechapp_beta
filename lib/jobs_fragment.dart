@@ -432,7 +432,7 @@ class _ConfirmButtonState extends State<ConfirmButton> {
                                   Navigator.of(context).pop();
                                 },
                                 child: Text(
-                                  "NO",
+                                  "CANCEL",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontSize: 20,
@@ -462,7 +462,7 @@ class _ConfirmButtonState extends State<ConfirmButton> {
                                       _setState);
                                 },
                                 child: Text(
-                                  "YES",
+                                  "  RATE   ",
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                       fontSize: 20,
