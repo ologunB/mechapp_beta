@@ -164,7 +164,10 @@ class _HomeFragmentState extends State<HomeFragment> {
             future: getProfiles(),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
-                var kEYS = dATA.keys;
+                var kEYS = [];
+                if (dATA != null) {
+                  kEYS = dATA.keys;
+                }
 
                 mechList.clear();
                 for (var key in kEYS) {

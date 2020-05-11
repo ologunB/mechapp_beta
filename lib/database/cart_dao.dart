@@ -6,6 +6,10 @@ import 'cart_model.dart';
 abstract class MyCartDao {
   @Query('SELECT * FROM CartItems')
   Future<List<CartModel>> getItems();
+/*
+  @Query('SELECT * FROM CartItems')
+  Stream<List<CartModel>> getItemsStream();
+*/
 
   @insert
   Future<void> insertItem(CartModel cartModel);

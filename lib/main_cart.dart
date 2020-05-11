@@ -57,6 +57,7 @@ class _MainCartState extends State<MainCart>
                   ),
                 ),
               ]),
+          leading: Container(),
           centerTitle: true,
         ),
         body: Container(
@@ -70,6 +71,8 @@ class _MainCartState extends State<MainCart>
 }
 
 class MyCart extends StatefulWidget {
+  int a;
+  MyCart({this.a});
   @override
   _MyCartState createState() => _MyCartState();
 }
@@ -83,6 +86,7 @@ class _MyCartState extends State<MyCart> with AutomaticKeepAliveClientMixin {
 
   @override
   void initState() {
+    a = 0;
     getData();
     super.initState();
     counters = List();
@@ -94,7 +98,6 @@ class _MyCartState extends State<MyCart> with AutomaticKeepAliveClientMixin {
     final database =
         await $FloorAppDatabase.databaseBuilder('flutter_database.db').build();
     final dao = database.cartDao;
-
     getItems = dao.getItems();
     cartItems = await dao.getItems();
 
@@ -105,6 +108,14 @@ class _MyCartState extends State<MyCart> with AutomaticKeepAliveClientMixin {
       }
     });
     setState(() {});
+  }
+
+  Future<List<CartModel>> getThem() async {
+    return (await $FloorAppDatabase
+            .databaseBuilder('flutter_database.db')
+            .build())
+        .cartDao
+        .getItems();
   }
 
   void doDelete(int index, BuildContext context) async {
@@ -124,13 +135,19 @@ class _MyCartState extends State<MyCart> with AutomaticKeepAliveClientMixin {
     });
   }
 
+  int a = 0;
   @override
   Widget build(BuildContext context) {
+    setState(() {});
+    if (a == 0) {
+      getData();
+      a++;
+    }
     return Scaffold(
       body: Container(
         color: Colors.grey[200],
         child: FutureBuilder(
-            future: getItems,
+            future: getThem(),
             builder: (context, snaps) {
               if (snaps.connectionState == ConnectionState.done) {
                 items = snaps.data;
@@ -417,8 +434,7 @@ class _CartHistoryState extends State<CartHistory>
         stream: getData(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
-            List<CartHistoryModel> items = snapshot.data;
-            return items.isEmpty
+            return list.isEmpty
                 ? Center(
                     child: Text(
                       "Order is empty, Go and shop",
@@ -426,7 +442,7 @@ class _CartHistoryState extends State<CartHistory>
                     ),
                   )
                 : ListView.builder(
-                    itemCount: items.length,
+                    itemCount: list.length,
                     itemBuilder: (context, index) {
                       return GestureDetector(
                         onTap: () {
@@ -434,7 +450,7 @@ class _CartHistoryState extends State<CartHistory>
                               context,
                               CupertinoPageRoute(
                                   builder: (context) => CartHistoryDetails(
-                                        cartItem: items[index],
+                                        cartItem: list[index],
                                       )));
                         },
                         child: Card(
@@ -446,7 +462,7 @@ class _CartHistoryState extends State<CartHistory>
                                   child: Padding(
                                     padding: const EdgeInsets.all(5.0),
                                     child: Text(
-                                      items[index].itemNames[0],
+                                      list[index].itemNames[0],
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                           fontSize: 18,
@@ -463,7 +479,7 @@ class _CartHistoryState extends State<CartHistory>
                                         Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: CachedNetworkImage(
-                                            imageUrl: items[index].images[0],
+                                            imageUrl: list[index].images[0],
                                             height: 50,
                                             width: 50,
                                             placeholder: (context, url) =>
@@ -484,14 +500,14 @@ class _CartHistoryState extends State<CartHistory>
                                                 MainAxisAlignment.center,
                                             children: <Widget>[
                                               Text(
-                                                "By: ${items[index].sellers[0]}",
+                                                "By: ${list[index].sellers[0]}",
                                                 style: TextStyle(
                                                   fontSize: 17,
                                                 ),
                                               ),
 
                                               Text(
-                                                "\₦ ${items[index].price}",
+                                                "\₦ ${list[index].price}",
                                                 style: TextStyle(
                                                     fontSize: 18,
                                                     fontWeight: FontWeight.w900,
@@ -523,7 +539,7 @@ class _CartHistoryState extends State<CartHistory>
                                                         color: Colors.black38),
                                                   ),
                                                   Text(
-                                                    items[index]
+                                                    list[index]
                                                         .images
                                                         .length
                                                         .toString(),
@@ -535,10 +551,10 @@ class _CartHistoryState extends State<CartHistory>
                                               ),
                                             ),
                                             Text(
-                                              items[index].status,
+                                              list[index].status,
                                               style: TextStyle(
                                                 fontSize: 18,
-                                                color: items[index].status ==
+                                                color: list[index].status ==
                                                         "Delivered"
                                                     ? Colors.green
                                                     : Colors.red,

@@ -307,7 +307,9 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
           Navigator.pushReplacement(
               context,
               CupertinoPageRoute(
-                  builder: (context) => OrderConfirmedDone(),
+                  builder: (context) => OrderConfirmedDone(
+                        from: "Mech",
+                      ),
                   fullscreenDialog: true));
         });
       });

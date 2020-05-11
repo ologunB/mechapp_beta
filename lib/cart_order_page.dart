@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mechapp/database/cart_model.dart';
 import 'package:mechapp/utils/type_constants.dart';
 import 'package:rave_flutter/rave_flutter.dart';
@@ -432,10 +433,11 @@ class _OrderNowPageState extends State<OrderNowPage>
             .child(payTransactID)
             .set(valuesToCustomer)
             .then((a) {
+          Navigator.pop(context);
           Navigator.pushReplacement(
               context,
               CupertinoPageRoute(
-                  builder: (context) => OrderConfirmedDone(),
+                  builder: (context) => OrderConfirmedDone(from: "Cart"),
                   fullscreenDialog: true));
         });
       });

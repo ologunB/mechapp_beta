@@ -94,8 +94,10 @@ class _EachServiceState extends State<EachService>
       future: getAllMechanics(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
-          var kEYS = dATA.keys.toList();
-
+          var kEYS = [];
+          if (snapshot.hasData) {
+            kEYS = dATA.keys.toList();
+          }
           mechList.clear();
           for (var key in kEYS) {
             String tempName = dATA[key]['Company Name'];
@@ -178,92 +180,98 @@ class _EachServiceState extends State<EachService>
                   ),
                 ),
                 Expanded(
-                  child: ListView.builder(
-                    itemCount: mechList.length,
-                    itemBuilder: (context, int index) {
-                      return GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            CupertinoPageRoute(
-                              builder: (context) => ViewMechProfile(
-                                mechanic: mechList[index],
-                              ),
-                            ),
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                                color: Colors.white,
-                                boxShadow: [BoxShadow(color: Colors.black12)],
-                                borderRadius: BorderRadius.circular(15)),
-                            child: Center(
-                                child: ListTile(
-                              subtitle: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: <Widget>[
-                                  Row(
-                                    children: <Widget>[
-                                      Icon(
-                                        Icons.call,
-                                        color: primaryColor,
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                            horizontal: 10),
-                                        child: Text(
-                                          mechList[index].phoneNumber,
-                                          style: TextStyle(
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.w500,
-                                              color: Colors.black54),
+                  child: mechList.isEmpty
+                      ? emptyList("Nearby Mechanic")
+                      : ListView.builder(
+                          itemCount: mechList.length,
+                          itemBuilder: (context, int index) {
+                            return GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  CupertinoPageRoute(
+                                    builder: (context) => ViewMechProfile(
+                                      mechanic: mechList[index],
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      boxShadow: [
+                                        BoxShadow(color: Colors.black12)
+                                      ],
+                                      borderRadius: BorderRadius.circular(15)),
+                                  child: Center(
+                                      child: ListTile(
+                                    subtitle: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: <Widget>[
+                                        Row(
+                                          children: <Widget>[
+                                            Icon(
+                                              Icons.call,
+                                              color: primaryColor,
+                                            ),
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 10),
+                                              child: Text(
+                                                mechList[index].phoneNumber,
+                                                style: TextStyle(
+                                                    fontSize: 17,
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Colors.black54),
+                                              ),
+                                            ),
+                                            Icon(
+                                              Icons.message,
+                                              color: primaryColor,
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                    title: Text(
+                                      mechList[index].name,
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.black),
+                                    ),
+                                    leading: ClipRRect(
+                                      borderRadius: BorderRadius.circular(24),
+                                      child: CachedNetworkImage(
+                                        imageUrl: mechList[index].image,
+                                        height: 48,
+                                        width: 48,
+                                        placeholder: (context, url) => Image(
+                                          image: AssetImage(
+                                            "assets/images/person.png",
+                                          ),
+                                          height: 48,
+                                          width: 48,
+                                        ),
+                                        errorWidget: (context, url, error) =>
+                                            Image(
+                                          image: AssetImage(
+                                              "assets/images/person.png"),
+                                          height: 48,
+                                          width: 48,
                                         ),
                                       ),
-                                      Icon(
-                                        Icons.message,
-                                        color: primaryColor,
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              title: Text(
-                                mechList[index].name,
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.black),
-                              ),
-                              leading: ClipRRect(
-                                borderRadius: BorderRadius.circular(24),
-                                child: CachedNetworkImage(
-                                  imageUrl: mechList[index].image,
-                                  height: 48,
-                                  width: 48,
-                                  placeholder: (context, url) => Image(
-                                    image: AssetImage(
-                                      "assets/images/person.png",
                                     ),
-                                    height: 48,
-                                    width: 48,
-                                  ),
-                                  errorWidget: (context, url, error) => Image(
-                                    image:
-                                        AssetImage("assets/images/person.png"),
-                                    height: 48,
-                                    width: 48,
-                                  ),
+                                  )),
                                 ),
                               ),
-                            )),
-                          ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
                 )
               ],
             ),

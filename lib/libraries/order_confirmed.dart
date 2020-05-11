@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:mechapp/cus_main.dart';
 
 class OrderConfirmedDone extends StatefulWidget {
+  final String from;
+
+  const OrderConfirmedDone({Key key, this.from}) : super(key: key);
   @override
   _OrderConfirmedDoneState createState() => _OrderConfirmedDoneState();
 }
@@ -10,12 +13,17 @@ class OrderConfirmedDone extends StatefulWidget {
 class _OrderConfirmedDoneState extends State<OrderConfirmedDone> {
   @override
   void initState() {
-    Future.delayed(Duration(milliseconds: 3000)).then((val) {
-      Navigator.pushReplacement(
-          context,
-          CupertinoPageRoute(
-              builder: (context) => CusMainPage(), fullscreenDialog: true));
-    });
+    widget.from == "Cart"
+        ? Future.delayed(Duration(milliseconds: 3000)).then((val) {
+            Navigator.pop(context);
+          })
+        : Future.delayed(Duration(milliseconds: 3000)).then((val) {
+            Navigator.pushReplacement(
+                context,
+                CupertinoPageRoute(
+                    builder: (context) => CusMainPage(),
+                    fullscreenDialog: true));
+          });
     super.initState();
   }
 
