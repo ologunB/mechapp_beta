@@ -102,10 +102,11 @@ class _CusMainPageState extends State<CusMainPage> {
       prefs.remove("uid");
       prefs.remove("email");
       prefs.remove("name");
+      prefs.remove("phone");
     });
   }
 
-  Future<String> uid, email, name, type;
+  Future<String> uid, email, name, type, phone;
 
   @override
   void initState() {
@@ -123,6 +124,18 @@ class _CusMainPageState extends State<CusMainPage> {
     type = _prefs.then((prefs) {
       return (prefs.getString('type') ?? "customerName");
     });
+    phone = _prefs.then((prefs) {
+      return (prefs.getString('phone') ?? "customerName");
+    });
+    doAssign();
+  }
+
+  void doAssign() async {
+    mName = await name;
+    userType = await type;
+    mEmail = await email;
+    mPhone = await phone;
+    mUID = await uid;
   }
 
   bool isSearchingShop = false;

@@ -433,7 +433,6 @@ class _OrderNowPageState extends State<OrderNowPage>
             .child(payTransactID)
             .set(valuesToCustomer)
             .then((a) {
-          Navigator.pop(context);
           Navigator.pushReplacement(
               context,
               CupertinoPageRoute(

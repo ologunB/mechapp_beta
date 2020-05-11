@@ -15,14 +15,16 @@ class _OrderConfirmedDoneState extends State<OrderConfirmedDone> {
   void initState() {
     widget.from == "Cart"
         ? Future.delayed(Duration(milliseconds: 3000)).then((val) {
-            Navigator.pop(context);
+            Navigator.pushAndRemoveUntil(
+                context,
+                CupertinoPageRoute(builder: (context) => CusMainPage()),
+                (Route<dynamic> route) => false);
           })
         : Future.delayed(Duration(milliseconds: 3000)).then((val) {
-            Navigator.pushReplacement(
+            Navigator.pushAndRemoveUntil(
                 context,
-                CupertinoPageRoute(
-                    builder: (context) => CusMainPage(),
-                    fullscreenDialog: true));
+                CupertinoPageRoute(builder: (context) => CusMainPage()),
+                (Route<dynamic> route) => false);
           });
     super.initState();
   }
@@ -30,24 +32,32 @@ class _OrderConfirmedDoneState extends State<OrderConfirmedDone> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        padding: EdgeInsets.all(50),
-        alignment: Alignment.center,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Image.asset("assets/images/confirmed.png"),
-            SizedBox(height: 30),
-            Text(
-              "Order Confirmed, In queue for confirmation",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                  color: Colors.black,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 28),
-            ),
-            SizedBox(height: 30),
-          ],
+      body: GestureDetector(
+        onTap: () {
+          Navigator.pushAndRemoveUntil(
+              context,
+              CupertinoPageRoute(builder: (context) => CusMainPage()),
+              (Route<dynamic> route) => false);
+        },
+        child: Container(
+          padding: EdgeInsets.all(50),
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Image.asset("assets/images/confirmed.png"),
+              SizedBox(height: 30),
+              Text(
+                "Order Confirmed, In queue for confirmation",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 28),
+              ),
+              SizedBox(height: 30),
+            ],
+          ),
         ),
       ),
     );

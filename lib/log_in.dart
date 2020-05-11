@@ -6,11 +6,11 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mechapp/cus_main.dart';
 import 'package:mechapp/dropdown_noti_cate.dart';
 import 'package:mechapp/get_location_from_address.dart';
 import 'package:mechapp/mechanic/mech_main.dart';
-import 'package:mechapp/select_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'libraries/custom_button.dart';
@@ -103,7 +103,7 @@ class _SignInPageState extends State<SignInPage> {
   bool forgotPassIsLoading = false;
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
-  Future signIn(String email, String password) async {
+  Future signIn(String email, String password, context) async {
     setState(() {
       isLoading = true;
     });
@@ -117,7 +117,42 @@ class _SignInPageState extends State<SignInPage> {
           setState(() {
             isLoading = false;
           });
-          showToast("Email not verified", context);
+          showCupertinoDialog(
+              context: context,
+              builder: (_) {
+                return CupertinoAlertDialog(
+                  title: Text(
+                    "Email not verified!",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.black, fontSize: 20),
+                  ),
+                  actions: <Widget>[
+                    Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(5.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50),
+                              color: primaryColor),
+                          child: FlatButton(
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                            child: Text(
+                              "OK",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w900,
+                                  color: Colors.white),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              });
           _firebaseAuth.signOut();
           return;
         }
@@ -138,7 +173,7 @@ class _SignInPageState extends State<SignInPage> {
 
           String uid = type == "Customer" ? "Uid" : "Mech Uid";
           putInDB(type, document.data[uid], document.data["Email"],
-              document.data["Company Name"]);
+              document.data["Company Name"], document.data["Phone Number"]);
 
           showToast("Logged in", context);
         }).catchError((e) {
@@ -164,7 +199,8 @@ class _SignInPageState extends State<SignInPage> {
     });
   }
 
-  Future putInDB(String type, String uid, String email, String name) async {
+  Future putInDB(
+      String type, String uid, String email, String name, phone) async {
     final SharedPreferences prefs = await _prefs;
     setState(() {
       prefs.setBool("isLoggedIn", true);
@@ -172,6 +208,7 @@ class _SignInPageState extends State<SignInPage> {
       prefs.setString("email", email);
       prefs.setString("name", name);
       prefs.setString("type", type);
+      prefs.setString("phone", phone);
     });
     _firebaseAuth.signOut();
   }
@@ -291,9 +328,40 @@ class _SignInPageState extends State<SignInPage> {
                                                                     });
                                                                     Navigator.pop(
                                                                         context);
-                                                                    showCenterToast(
-                                                                        "Reset Mail Sent",
-                                                                        context);
+                                                                    showCupertinoDialog(
+                                                                        context:
+                                                                            context,
+                                                                        builder:
+                                                                            (_) {
+                                                                          return CupertinoAlertDialog(
+                                                                            title:
+                                                                                Text(
+                                                                              "Reset email sent!",
+                                                                              textAlign: TextAlign.center,
+                                                                              style: TextStyle(color: Colors.black, fontSize: 20),
+                                                                            ),
+                                                                            actions: <Widget>[
+                                                                              Center(
+                                                                                child: Padding(
+                                                                                  padding: EdgeInsets.all(5.0),
+                                                                                  child: Container(
+                                                                                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: primaryColor),
+                                                                                    child: FlatButton(
+                                                                                      onPressed: () {
+                                                                                        Navigator.of(context).pop();
+                                                                                      },
+                                                                                      child: Text(
+                                                                                        "OK",
+                                                                                        textAlign: TextAlign.center,
+                                                                                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white),
+                                                                                      ),
+                                                                                    ),
+                                                                                  ),
+                                                                                ),
+                                                                              ),
+                                                                            ],
+                                                                          );
+                                                                        });
                                                                   });
                                                                 },
                                                       icon: forgotPassIsLoading
@@ -346,7 +414,7 @@ class _SignInPageState extends State<SignInPage> {
                                                     return;
                                                   }
                                                   signIn(_inEmail.text,
-                                                      _inPass.text);
+                                                      _inPass.text, context);
                                                 },
                                           icon: isLoading
                                               ? CupertinoActivityIndicator(
@@ -463,7 +531,7 @@ class _CusSignUpState extends State<CusSignUp> {
                       style: TextStyle(color: Colors.black, fontSize: 20),
                     ),
                     actions: <Widget>[
-                      Center(
+                      /*Center(
                         child: Padding(
                           padding: EdgeInsets.all(5.0),
                           child: Container(
@@ -485,7 +553,7 @@ class _CusSignUpState extends State<CusSignUp> {
                             ),
                           ),
                         ),
-                      ),
+                      ),*/
                     ],
                   );
                 });
@@ -657,6 +725,7 @@ class MechSignUp extends StatefulWidget {
 
 class _MechSignUpState extends State<MechSignUp> {
   bool isLoading = false;
+  String selectedCity;
 
   List<bool> _specifyBoolList = [
     false,
@@ -707,12 +776,11 @@ class _MechSignUpState extends State<MechSignUp> {
   TextEditingController _upEmail = TextEditingController();
   TextEditingController _upPass = TextEditingController();
   TextEditingController _upStreetName = TextEditingController();
-  TextEditingController _upCity = TextEditingController();
   TextEditingController _upLocality = TextEditingController();
   TextEditingController _upWebsite = TextEditingController();
   TextEditingController _upDescpt = TextEditingController();
 
-  Future mechSignUp() async {
+  Future mechSignUp(BuildContext context) async {
     setState(() {
       isLoading = true;
     });
@@ -756,12 +824,13 @@ class _MechSignUpState extends State<MechSignUp> {
           m.putIfAbsent("Phone Number", () => _upPhoneNo.text);
           m.putIfAbsent("Email", () => _upEmail.text);
           m.putIfAbsent("Street Name", () => _upStreetName.text);
-          m.putIfAbsent("City", () => _upCity.text);
+          m.putIfAbsent("City", () => selectedCity);
           m.putIfAbsent("Locality", () => _upLocality.text);
-          m.putIfAbsent("Description", () => _upDescpt.text);
-          m.putIfAbsent("Website Url", () => _upWebsite.text);
-          m.putIfAbsent("Loc Latitude", () => currentLocation.latitude);
-          m.putIfAbsent("LOc Longitude", () => currentLocation.longitude);
+          m.putIfAbsent("Description", () => _upDescpt.text ?? "Empty");
+          m.putIfAbsent("Website Url", () => _upWebsite.text ?? "Empty");
+          m.putIfAbsent("Loc Latitude", () => currentLocation.latitude ?? 6.5);
+          m.putIfAbsent(
+              "LOc Longitude", () => currentLocation.longitude ?? 6.5);
           m.putIfAbsent("Image Url", () => "em");
           m.putIfAbsent("CAC Image Url", () => "em");
           m.putIfAbsent("PreviousImage1 Url", () => "em");
@@ -927,7 +996,7 @@ class _MechSignUpState extends State<MechSignUp> {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 12.0, vertical: 20),
       child: Container(
-        height: MediaQuery.of(context).size.height / 1.5,
+        height: MediaQuery.of(context).size.height / 1.35,
         child: Card(
           elevation: 5,
           child: Padding(
@@ -946,10 +1015,25 @@ class _MechSignUpState extends State<MechSignUp> {
                     ),
                   ),
                 ),
-                SelectImage(
-                  url: "em",
-                  defaultUrl: "assets/images/engineer.png",
-                  image: _mainPicture,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(50),
+                  child: Container(
+                    height: 100,
+                    width: 100,
+                    child: GestureDetector(
+                      onTap: () {
+                        getPic();
+                      },
+                      child: _mainPicture == null
+                          ? Image(
+                              image: AssetImage("assets/images/photo.png"),
+                              height: 90,
+                              width: 90,
+                              fit: BoxFit.contain)
+                          : Image.file(_mainPicture,
+                              height: 90, width: 90, fit: BoxFit.contain),
+                    ),
+                  ),
                 ),
                 NotiAndCategory(_upSpecify, _specifyBoolList, "Specifications",
                     specifyList),
@@ -992,13 +1076,38 @@ class _MechSignUpState extends State<MechSignUp> {
                   keyboardType: TextInputType.visiblePassword,
                 ),
                 GetLocationFromAddress(upStreetName: _upStreetName),
-                TextField(
-                  decoration: InputDecoration(
-                      hintText: "City",
-                      labelText: "City",
-                      labelStyle: TextStyle(color: Colors.blue)),
-                  style: TextStyle(fontSize: 18),
-                  controller: _upCity,
+                SizedBox(height: 6),
+                Text("City", style: TextStyle(color: Colors.blue)),
+                DropdownButton<String>(
+                  hint: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    child: Text("Select your city"),
+                  ),
+                  value: selectedCity,
+                  underline: SizedBox(),
+                  items: ["Ibadan", "Lagos"].map((value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
+                          value,
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                  isExpanded: true,
+                  onChanged: (value) {
+                    setState(() {
+                      selectedCity = value;
+                    });
+                    FocusScope.of(context).unfocus();
+                  },
+                ),
+                Divider(
+                  color: Colors.black45,
+                  thickness: 1,
                 ),
                 TextField(
                   decoration: InputDecoration(
@@ -1038,17 +1147,41 @@ class _MechSignUpState extends State<MechSignUp> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: <Widget>[
                     Expanded(
-                      child: SelectImage(
-                        url: "e ",
-                        defaultUrl: "assets/images/photo.png",
-                        image: _previous1,
+                      child: Container(
+                        height: 100,
+                        width: 100,
+                        child: InkWell(
+                          onTap: () {
+                            getImage1();
+                          },
+                          child: _previous1 == null
+                              ? Image(
+                                  image: AssetImage("assets/images/photo.png"),
+                                  height: 90,
+                                  width: 90,
+                                  fit: BoxFit.contain)
+                              : Image.file(_previous1,
+                                  height: 90, width: 90, fit: BoxFit.contain),
+                        ),
                       ),
                     ),
                     Expanded(
-                      child: SelectImage(
-                        url: " e",
-                        defaultUrl: "assets/images/photo.png",
-                        image: _previous2,
+                      child: Container(
+                        height: 100,
+                        width: 100,
+                        child: InkWell(
+                          onTap: () {
+                            getImage2();
+                          },
+                          child: _previous2 == null
+                              ? Image(
+                                  image: AssetImage("assets/images/photo.png"),
+                                  height: 90,
+                                  width: 90,
+                                  fit: BoxFit.contain)
+                              : Image.file(_previous2,
+                                  height: 90, width: 90, fit: BoxFit.contain),
+                        ),
                       ),
                     ),
                   ],
@@ -1064,10 +1197,22 @@ class _MechSignUpState extends State<MechSignUp> {
                   ),
                 ),
                 Center(
-                    child: SelectImage(
-                  url: " e",
-                  defaultUrl: "assets/images/photo.png",
-                  image: _cacImage,
+                    child: Container(
+                  height: 100,
+                  width: 100,
+                  child: InkWell(
+                    onTap: () {
+                      getCACImage();
+                    },
+                    child: _cacImage == null
+                        ? Image(
+                            image: AssetImage("assets/images/photo.png"),
+                            height: 90,
+                            width: 90,
+                            fit: BoxFit.contain)
+                        : Image.file(_cacImage,
+                            height: 90, width: 90, fit: BoxFit.contain),
+                  ),
                 )),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
@@ -1078,28 +1223,42 @@ class _MechSignUpState extends State<MechSignUp> {
                         : () {
                             if (_upEmail.text.toString().isEmpty) {
                               showEmptyToast("Email", context);
+                              return;
                             } else if (_upPass.text.toString().isEmpty) {
                               showEmptyToast("Password", context);
+                              return;
                             } else if (_upName.text.toString().isEmpty) {
                               showEmptyToast("Name", context);
+                              return;
                             } else if (_upPhoneNo.text.toString().isEmpty) {
                               showEmptyToast("Phone Number", context);
+                              return;
                             } else if (_upSpecify.text.toString().isEmpty) {
                               showEmptyToast("Specification", context);
+                              return;
                             } else if (_upCategory.text.toString().isEmpty) {
                               showEmptyToast("Category", context);
+                              return;
                             } else if (_upStreetName.text.toString().isEmpty) {
                               showEmptyToast("Street name", context);
-                            } else if (_upCity.text.toString().isEmpty) {
+                              return;
+                            } else if (selectedCity.isEmpty) {
                               showEmptyToast("City", context);
+                              return;
                             } else if (_upLocality.text.toString().isEmpty) {
                               showEmptyToast("Locality", context);
+                              return;
                             } else if (_cacImage == null) {
                               showEmptyToast("CAC Image", context);
+                              return;
                             } else if (_mainPicture == null) {
                               showEmptyToast("Image", context);
+                              return;
+                            } else if (currentLocation == null) {
+                              showEmptyToast("Postition", context);
+                              return;
                             }
-                            mechSignUp();
+                            mechSignUp(context);
                           },
                     icon: isLoading
                         ? CupertinoActivityIndicator(radius: 20)
@@ -1118,5 +1277,37 @@ class _MechSignUpState extends State<MechSignUp> {
         ),
       ),
     );
+  }
+
+  Future getCACImage() async {
+    var img = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      _cacImage = img;
+    });
+  }
+
+  Future getImage1() async {
+    var img = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      _previous1 = img;
+    });
+  }
+
+  Future getImage2() async {
+    var img = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      _previous2 = img;
+    });
+  }
+
+  Future getPic() async {
+    var img = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      _mainPicture = img;
+    });
   }
 }

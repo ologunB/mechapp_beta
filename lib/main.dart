@@ -42,11 +42,9 @@ class _MyWrapperState extends State<MyWrapper> {
   @override
   void initState() {
     super.initState();
-
     type = _prefs.then((prefs) {
       return (prefs.getString('type'));
     });
-
     uid = _prefs.then((prefs) {
       return (prefs.getString('uid') ?? "mechUID");
     });

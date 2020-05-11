@@ -129,7 +129,6 @@ class _MyCartState extends State<MyCart> with AutomaticKeepAliveClientMixin {
       total = 0;
       for (int i = 0; i < cartItems.length; i++) {
         total = total + double.parse(cartItems[i].price);
-        setState(() {});
       }
       setState(() {});
     });
@@ -138,7 +137,6 @@ class _MyCartState extends State<MyCart> with AutomaticKeepAliveClientMixin {
   int a = 0;
   @override
   Widget build(BuildContext context) {
-    setState(() {});
     if (a == 0) {
       getData();
       a++;

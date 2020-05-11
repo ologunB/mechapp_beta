@@ -12,6 +12,7 @@ class JobModel {
       cusStatus,
       mechStatus,
       transactID,
+      serverCon,
       otherPersonUID;
   JobModel(
       {this.otherPersonName,
@@ -21,6 +22,7 @@ class JobModel {
       this.cusStatus,
       this.mechStatus,
       this.otherPersonUID,
+      this.serverCon,
       this.transactID});
 }
 
@@ -31,6 +33,7 @@ class MechJobsF extends StatefulWidget {
 
 var rootRef = FirebaseDatabase.instance.reference();
 List<JobModel> list = [];
+String a_, b_, c_, d_, e_, f_, g_, h_;
 
 class _MechJobsFState extends State<MechJobsF> {
   Stream<List<JobModel>> _getJobs() async* {
@@ -51,9 +54,11 @@ class _MechJobsFState extends State<MechJobsF> {
         String tempMechStatus = dATA[index]['Mech Confirmation'];
         String tempCusUID = dATA[index]['Customer UID'];
         String tempTransactID = dATA[index]['Trans ID'];
+        String tempServerCon = dATA[index]['Server Confirmation'];
 
         list.add(
           JobModel(
+              serverCon: tempServerCon,
               otherPersonName: tempName,
               amount: tempPrice,
               phoneNumber: tempNumber,
@@ -65,6 +70,22 @@ class _MechJobsFState extends State<MechJobsF> {
         );
       }
     });
+
+    rootRef
+        .child("All Jobs Collection")
+        .child(mUID)
+        .once()
+        .then((snapshot) => () async {
+              var dATA = snapshot.value;
+              a_ = dATA["Total Job"];
+              b_ = dATA["Total Amount"];
+              c_ = dATA["Pending Job"];
+              d_ = dATA["Pending Amount"];
+              e_ = dATA['Cash Payment Debt'];
+              f_ = dATA['Pay pending Amount'];
+              g_ = dATA['Payment Request'];
+              h_ = dATA['Completed Amount'];
+            });
     yield list;
   }
 
@@ -159,64 +180,99 @@ class ButtonConfirm extends StatefulWidget {
 class _ButtonConfirmState extends State<ButtonConfirm> {
   String status = "Confirm Job?";
   Color statusColor = Colors.blue;
-  void confirmJob(int index, asetState) async {
-    String received =
-        "Payment has been confirmed by you. Thanks for using FABAT";
 
-    String sent =
-        "Your payment has been confirmed by the mechanic. Thanks for using FABAT";
-    Map<String, String> sentMessage = Map();
-    sentMessage.putIfAbsent("notification_message", () => sent);
-    sentMessage.putIfAbsent("notification_time", () => thePresentTime());
-
-    Map<String, String> receivedMessage = Map();
-    receivedMessage.putIfAbsent("notification_message", () => received);
-    receivedMessage.putIfAbsent("notification_time", () => thePresentTime());
-
-    Map<String, Object> valuesToMech = Map();
-    valuesToMech.putIfAbsent("Mech Confirmation", () => "Confirmed");
-
-    Map<String, Object> valuesToCustomer = Map();
-    valuesToCustomer.putIfAbsent("Mech Confirmation", () => "Confirmed");
-
+  void confirmJob(int index, aSetState, context) async {
+    String otherUID = list[index].otherPersonUID;
     String transactID = list[index].transactID;
-    String cusUID = list[index].otherPersonUID;
-    rootRef
-        .child("Notification Collection")
-        .child("Mechanic")
-        .child(mUID)
-        .child(transactID)
-        .set(receivedMessage);
-    rootRef
-        .child("Jobs Collection")
-        .child("Mechanic")
-        .child(mUID)
-        .child(transactID)
-        .update(valuesToMech);
+    String amount = list[index].amount;
+    String nameOfMech = list[index].otherPersonName;
+    String serverCon = list[index].serverCon;
 
-    rootRef
-        .child("Jobs Collection")
-        .child("Customer")
-        .child(cusUID)
-        .child(transactID)
-        .update(valuesToCustomer);
-    await rootRef
-        .child("Notification Collection")
-        .child("Customer")
-        .child(cusUID)
-        .child(transactID)
-        .set(sentMessage)
-        .then((t) => () {
-              Navigator.pop(context);
-              showToast("Updated Job", context);
-            });
-    asetState(() {
-      bool isConfirmed = list[widget.index].cusStatus == "Confirmed";
-      status = isConfirmed ? "COMPLETED!" : "PENDING!";
-      statusColor = isConfirmed ? Colors.black12 : Colors.red;
-    });
-    Navigator.pop(context);
-    showToast("Updated Job", context);
+    try {
+      int aa = int.parse(a_) + 1; // Total Jobs
+      int bb = int.parse(b_) + int.parse(amount); // Total Amount
+      int cc = int.parse(c_) - 1; // Pending Jobs
+      int dd = int.parse(d_) - int.parse(amount); // Pending Amount
+      int ee =
+          int.parse(e_) + (int.parse(amount) / 5).round(); // Cash Payment debt
+      int ff = int.parse(f_) + int.parse(amount); // Pay pending Amount
+
+      final Map<String, Object> updateJobs = Map();
+      updateJobs.putIfAbsent("Total Job", () => aa.toString());
+      updateJobs.putIfAbsent("Total Amount", () => bb.toString());
+      updateJobs.putIfAbsent("Pending Job", () => cc.toString());
+      updateJobs.putIfAbsent("Pending Amount", () => dd.toString());
+
+      if (serverCon == "By Cash") {
+        updateJobs.putIfAbsent("Cash Payment Debt", () => ee.toString());
+      } else {
+        updateJobs.putIfAbsent("Pay pending Amount", () => ff.toString());
+      }
+
+      String sent = "Your payment of ₦" +
+          amount +
+          " to " +
+          nameOfMech +
+          " for " +
+          " has been confirmed by admin. Thanks for using FABAT";
+
+      String received = "You have a confirmed payment of ₦" +
+          amount +
+          " by " +
+          mName +
+          " and shall be available soonest. Thanks for using FABAT";
+
+      final Map<String, String> sentMessage = Map();
+      sentMessage.putIfAbsent("notification_message", () => sent);
+      sentMessage.putIfAbsent("notification_time", () => thePresentTime());
+
+      final Map<String, String> receivedMessage = Map();
+      receivedMessage.putIfAbsent("notification_message", () => received);
+      receivedMessage.putIfAbsent("notification_time", () => thePresentTime());
+
+      Map<String, Object> valuesToMech = Map();
+      valuesToMech.putIfAbsent("Trans Confirmation", () => "Confirmed");
+
+      final Map<String, Object> valuesToCustomer = Map();
+      valuesToCustomer.putIfAbsent("Trans Confirmation", () => "Confirmed");
+
+      rootRef
+          .child("Jobs Collection")
+          .child("Mechanic")
+          .child(mUID)
+          .child(transactID)
+          .update(valuesToMech);
+
+      rootRef
+          .child("Notification Collection")
+          .child("Mechanic")
+          .child(mUID)
+          .child(transactID)
+          .set(receivedMessage);
+
+      rootRef
+          .child("Jobs Collection")
+          .child("Customer")
+          .child(otherUID)
+          .child(transactID)
+          .update(valuesToCustomer);
+      rootRef
+          .child("Notification Collection")
+          .child("Customer")
+          .child(otherUID)
+          .push()
+          .set(sentMessage);
+      rootRef.child("All Jobs Collection").child(mUID).update(updateJobs);
+      aSetState(() {
+        bool isConfirmed = list[widget.index].mechStatus == "Confirmed";
+        status = isConfirmed ? "RATE MECH." : "PENDING!";
+        statusColor = isConfirmed ? Colors.teal : Colors.red;
+      });
+      Navigator.pop(context);
+      showToast("Confirmed", context);
+    } catch (exp) {
+      showToast("Getting values. Try again...", context);
+    }
   }
 
   @override
@@ -244,7 +300,7 @@ class _ButtonConfirmState extends State<ButtonConfirm> {
                     builder: (_) => CustomDialog(
                       title: "Are you sure you want to confirm the Customer?",
                       onClicked: () {
-                        confirmJob(widget.index, _setState);
+                        confirmJob(widget.index, _setState, context);
                       },
                       includeHeader: true,
                     ),

@@ -5,7 +5,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:mechapp/libraries/toast.dart';
 
-String mUID, mEmail, mName, userType;
+String mUID, mEmail, mName, userType, mPhone;
 Position currentLocation;
 
 Color primaryColor = Color.fromARGB(255, 22, 58, 78);

@@ -233,7 +233,7 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
     Map<String, String> valuesToMech = Map();
     valuesToMech.putIfAbsent("Customer UID", () => mUID);
     valuesToMech.putIfAbsent("Customer Name", () => mName);
-    valuesToMech.putIfAbsent("Customer Number", () => "Cus number");
+    valuesToMech.putIfAbsent("Customer Number", () => mPhone);
     valuesToMech.putIfAbsent("Trans Amount", () => amount_);
     valuesToMech.putIfAbsent("Trans Time", () => now);
     valuesToMech.putIfAbsent("Server Confirmation", () => serverData);
@@ -272,7 +272,6 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
     receivedMessage.putIfAbsent("notification_message", () => received);
     receivedMessage.putIfAbsent("notification_time", () => now);
 
-    showCenterToast("yes pres", context);
     showCupertinoDialog(
         context: context,
         builder: (_) {

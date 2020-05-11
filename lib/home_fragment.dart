@@ -166,7 +166,7 @@ class _HomeFragmentState extends State<HomeFragment> {
               if (snapshot.connectionState == ConnectionState.done) {
                 var kEYS = [];
                 if (dATA != null) {
-                  kEYS = dATA.keys;
+                  kEYS = dATA.keys.toList();
                 }
 
                 mechList.clear();

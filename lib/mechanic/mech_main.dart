@@ -91,13 +91,14 @@ class _MechMainPageState extends State<MechMainPage> {
       prefs.remove("type");
       prefs.remove("uid");
       prefs.remove("email");
+      prefs.remove("phone");
     });
   }
 
   Future<String> uid;
   Future<String> email;
   Future<String> name;
-  Future<String> type;
+  Future<String> type, phone;
 
   @override
   void initState() {
@@ -116,15 +117,23 @@ class _MechMainPageState extends State<MechMainPage> {
       return (prefs.getString('type') ?? "mechName");
     });
 
+    phone = _prefs.then((prefs) {
+      return (prefs.getString('phone') ?? "mechName");
+    });
+
     currentWidget = MechHomeFragment();
 
     setState(() {
       currentWidget = MechHomeFragment();
     });
-    assign();
+    doAssign();
   }
 
-  void assign() async {
+  void doAssign() async {
+    mName = await name;
+    userType = await type;
+    mEmail = await email;
+    mPhone = await phone;
     mUID = await uid;
   }
 
