@@ -40,7 +40,7 @@ class _HomeFragmentState extends State<HomeFragment> {
           currentLocation.latitude, currentLocation.longitude);
 
       setState(() {
-        theAddress = placeMark[0].name + ", " + placeMark[0].locality;
+        theAddress = placeMark[0].name;
       });
     } catch (e) {
       showCupertinoDialog(

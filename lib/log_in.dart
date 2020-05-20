@@ -162,20 +162,112 @@ class _SignInPageState extends State<SignInPage> {
             .get()
             .then((document) {
           String type = document.data["Type"];
-          Navigator.of(context).pushReplacement(
-            CupertinoPageRoute(
-              fullscreenDialog: true,
-              builder: (context) {
-                return type == "Customer" ? CusMainPage() : MechMainPage();
-              },
-            ),
-          );
+          String state = document.data["State"];
 
-          String uid = type == "Customer" ? "Uid" : "Mech Uid";
-          putInDB(type, document.data[uid], document.data["Email"],
-              document.data["Company Name"], document.data["Phone Number"]);
+          if (state == "Review") {
+            showCupertinoDialog(
+                context: context,
+                builder: (_) {
+                  return CupertinoAlertDialog(
+                    title: Text(
+                      "Notice",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.black, fontSize: 18),
+                    ),
+                    content: Text(
+                      "Your Account has not been blocked for going against the FABAT rules. Check with the Admin through our various channels.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.black, fontSize: 16),
+                    ),
+                    actions: <Widget>[
+                      Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(5.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(50),
+                                color: primaryColor),
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text(
+                                "OK",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                });
+            _firebaseAuth.signOut();
+            return;
+          } else if (state == "Blocked") {
+            showCupertinoDialog(
+                context: context,
+                builder: (_) {
+                  return CupertinoAlertDialog(
+                    title: Text(
+                      "Notice",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.black, fontSize: 18),
+                    ),
+                    content: Text(
+                      "Your Account has not been approved and as it is under review. Check again in the next 24 hours!",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.black, fontSize: 16),
+                    ),
+                    actions: <Widget>[
+                      Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(5.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(50),
+                                color: primaryColor),
+                            child: FlatButton(
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                              child: Text(
+                                "OK",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                });
+            _firebaseAuth.signOut();
+            return;
+          } else {
+            Navigator.of(context).pushReplacement(
+              CupertinoPageRoute(
+                fullscreenDialog: true,
+                builder: (context) {
+                  return type == "Customer" ? CusMainPage() : MechMainPage();
+                },
+              ),
+            );
 
-          showToast("Logged in", context);
+            String uid = type == "Customer" ? "Uid" : "Mech Uid";
+            putInDB(type, document.data[uid], document.data["Email"],
+                document.data["Company Name"], document.data["Phone Number"]);
+
+            showToast("Logged in", context);
+          }
         }).catchError((e) {
           setState(() {
             isLoading = false;
@@ -216,219 +308,217 @@ class _SignInPageState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: EdgeInsets.all(18.0),
-        child: Center(
-            child: Card(
-                elevation: 5,
+      padding: EdgeInsets.all(18.0),
+      child: Center(
+        child: Card(
+          elevation: 5,
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 25.0),
+            child: SingleChildScrollView(
+              child: Container(
                 child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 25.0),
-                    child: SingleChildScrollView(
-                        child: Container(
-                            child: Padding(
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 10),
-                                child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: <Widget>[
-                                      Center(
-                                        child: Padding(
-                                          padding: EdgeInsets.only(bottom: 8.0),
-                                          child: Text(
-                                            "Sign In",
-                                            style: TextStyle(
-                                                fontSize: 20,
-                                                color: primaryColor,
-                                                fontWeight: FontWeight.w700),
-                                          ),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: CupertinoTextField(
-                                          controller: _inEmail,
-                                          placeholder: "Email",
-                                          placeholderStyle: TextStyle(
-                                              fontWeight: FontWeight.w400),
-                                          keyboardType:
-                                              TextInputType.emailAddress,
-                                          padding: EdgeInsets.all(10),
-                                          style: TextStyle(
-                                              fontSize: 20,
-                                              color: Colors.black),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: CupertinoTextField(
-                                          controller: _inPass,
-                                          placeholder: "Password",
-                                          padding: EdgeInsets.all(10),
-                                          placeholderStyle: TextStyle(
-                                              fontWeight: FontWeight.w400),
-                                          obscureText: true,
-                                          style: TextStyle(
-                                              fontSize: 20,
-                                              color: Colors.black),
-                                        ),
-                                      ),
-                                      MaterialButton(
-                                        onPressed: () {
-                                          showDialog(
-                                            barrierDismissible: true,
-                                            context: context,
-                                            builder: (_) =>
-                                                CupertinoAlertDialog(
-                                              title: Column(
-                                                children: <Widget>[
-                                                  Text("Enter Email"),
-                                                ],
-                                              ),
-                                              content: CupertinoTextField(
-                                                controller: _inForgotPass,
-                                                placeholder: "Email",
-                                                padding: EdgeInsets.all(10),
-                                                keyboardType:
-                                                    TextInputType.emailAddress,
-                                                placeholderStyle: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.w300),
-                                                style: TextStyle(
-                                                    fontSize: 20,
-                                                    color: Colors.black),
-                                              ),
-                                              actions: <Widget>[
-                                                Center(
-                                                  child: StatefulBuilder(
-                                                    builder:
-                                                        (context, _setState) =>
-                                                            CustomButton(
-                                                      title: forgotPassIsLoading
-                                                          ? ""
-                                                          : "Reset Password",
-                                                      onPress:
-                                                          forgotPassIsLoading
-                                                              ? null
-                                                              : () async {
-                                                                  setState(() {
-                                                                    forgotPassIsLoading =
-                                                                        true;
-                                                                  });
-                                                                  await _firebaseAuth
-                                                                      .sendPasswordResetEmail(
-                                                                          email: _inForgotPass
-                                                                              .text)
-                                                                      .then(
-                                                                          (value) {
-                                                                    _setState(
-                                                                        () {
-                                                                      forgotPassIsLoading =
-                                                                          true;
-                                                                    });
-                                                                    Navigator.pop(
-                                                                        context);
-                                                                    showCupertinoDialog(
-                                                                        context:
-                                                                            context,
-                                                                        builder:
-                                                                            (_) {
-                                                                          return CupertinoAlertDialog(
-                                                                            title:
-                                                                                Text(
-                                                                              "Reset email sent!",
-                                                                              textAlign: TextAlign.center,
-                                                                              style: TextStyle(color: Colors.black, fontSize: 20),
-                                                                            ),
-                                                                            actions: <Widget>[
-                                                                              Center(
-                                                                                child: Padding(
-                                                                                  padding: EdgeInsets.all(5.0),
-                                                                                  child: Container(
-                                                                                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(50), color: primaryColor),
-                                                                                    child: FlatButton(
-                                                                                      onPressed: () {
-                                                                                        Navigator.of(context).pop();
-                                                                                      },
-                                                                                      child: Text(
-                                                                                        "OK",
-                                                                                        textAlign: TextAlign.center,
-                                                                                        style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white),
-                                                                                      ),
-                                                                                    ),
-                                                                                  ),
-                                                                                ),
-                                                                              ),
-                                                                            ],
-                                                                          );
-                                                                        });
-                                                                  });
-                                                                },
-                                                      icon: forgotPassIsLoading
-                                                          ? CupertinoActivityIndicator(
-                                                              radius: 20)
-                                                          : Icon(
-                                                              Icons
-                                                                  .arrow_forward,
+                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Center(
+                        child: Padding(
+                          padding: EdgeInsets.only(bottom: 8.0),
+                          child: Text(
+                            "Sign In",
+                            style: TextStyle(
+                                fontSize: 20,
+                                color: primaryColor,
+                                fontWeight: FontWeight.w700),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CupertinoTextField(
+                          controller: _inEmail,
+                          placeholder: "Email",
+                          placeholderStyle:
+                              TextStyle(fontWeight: FontWeight.w400),
+                          keyboardType: TextInputType.emailAddress,
+                          padding: EdgeInsets.all(10),
+                          style: TextStyle(fontSize: 20, color: Colors.black),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: CupertinoTextField(
+                          controller: _inPass,
+                          placeholder: "Password",
+                          padding: EdgeInsets.all(10),
+                          placeholderStyle:
+                              TextStyle(fontWeight: FontWeight.w400),
+                          obscureText: true,
+                          style: TextStyle(fontSize: 20, color: Colors.black),
+                        ),
+                      ),
+                      MaterialButton(
+                        onPressed: () {
+                          showDialog(
+                            barrierDismissible: true,
+                            context: context,
+                            builder: (_) => CupertinoAlertDialog(
+                              title: Column(
+                                children: <Widget>[
+                                  Text("Enter Email"),
+                                ],
+                              ),
+                              content: CupertinoTextField(
+                                controller: _inForgotPass,
+                                placeholder: "Email",
+                                padding: EdgeInsets.all(10),
+                                keyboardType: TextInputType.emailAddress,
+                                placeholderStyle:
+                                    TextStyle(fontWeight: FontWeight.w300),
+                                style: TextStyle(
+                                    fontSize: 20, color: Colors.black),
+                              ),
+                              actions: <Widget>[
+                                Center(
+                                  child: StatefulBuilder(
+                                    builder: (context, _setState) =>
+                                        CustomButton(
+                                      title: forgotPassIsLoading
+                                          ? ""
+                                          : "Reset Password",
+                                      onPress: forgotPassIsLoading
+                                          ? null
+                                          : () async {
+                                              setState(() {
+                                                forgotPassIsLoading = true;
+                                              });
+                                              await _firebaseAuth
+                                                  .sendPasswordResetEmail(
+                                                      email: _inForgotPass.text)
+                                                  .then((value) {
+                                                _setState(() {
+                                                  forgotPassIsLoading = true;
+                                                });
+                                                Navigator.pop(context);
+                                                showCupertinoDialog(
+                                                    context: context,
+                                                    builder: (_) {
+                                                      return CupertinoAlertDialog(
+                                                        title: Text(
+                                                          "Reset email sent!",
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                          style: TextStyle(
                                                               color:
-                                                                  Colors.white,
+                                                                  Colors.black,
+                                                              fontSize: 20),
+                                                        ),
+                                                        actions: <Widget>[
+                                                          Center(
+                                                            child: Padding(
+                                                              padding:
+                                                                  EdgeInsets
+                                                                      .all(5.0),
+                                                              child: Container(
+                                                                decoration: BoxDecoration(
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            50),
+                                                                    color:
+                                                                        primaryColor),
+                                                                child:
+                                                                    FlatButton(
+                                                                  onPressed:
+                                                                      () {
+                                                                    Navigator.of(
+                                                                            context)
+                                                                        .pop();
+                                                                  },
+                                                                  child: Text(
+                                                                    "OK",
+                                                                    textAlign:
+                                                                        TextAlign
+                                                                            .center,
+                                                                    style: TextStyle(
+                                                                        fontSize:
+                                                                            20,
+                                                                        fontWeight:
+                                                                            FontWeight
+                                                                                .w900,
+                                                                        color: Colors
+                                                                            .white),
+                                                                  ),
+                                                                ),
+                                                              ),
                                                             ),
-                                                      iconLeft: false,
-                                                      hasColor:
-                                                          forgotPassIsLoading
-                                                              ? true
-                                                              : false,
-                                                      bgColor: Colors.blueGrey,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
+                                                          ),
+                                                        ],
+                                                      );
+                                                    });
+                                              });
+                                            },
+                                      icon: forgotPassIsLoading
+                                          ? CupertinoActivityIndicator(
+                                              radius: 20)
+                                          : Icon(
+                                              Icons.arrow_forward,
+                                              color: Colors.white,
                                             ),
-                                          );
-                                        },
-                                        child: Text(
-                                          "Forgot Password?",
-                                          style: TextStyle(
-                                              color: Colors.indigo,
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.w600),
-                                        ),
-                                      ),
-                                      Center(
-                                        child: CustomButton(
-                                          title: isLoading ? "" : "  SIGN IN  ",
-                                          onPress: isLoading
-                                              ? null
-                                              : () {
-                                                  if (_inEmail.text
-                                                      .toString()
-                                                      .isEmpty) {
-                                                    showEmptyToast(
-                                                        "Email", context);
-                                                    return;
-                                                  } else if (_inPass.text
-                                                      .toString()
-                                                      .isEmpty) {
-                                                    showEmptyToast(
-                                                        "Password", context);
-                                                    return;
-                                                  }
-                                                  signIn(_inEmail.text,
-                                                      _inPass.text, context);
-                                                },
-                                          icon: isLoading
-                                              ? CupertinoActivityIndicator(
-                                                  radius: 20)
-                                              : Icon(
-                                                  Icons.arrow_forward,
-                                                  color: Colors.white,
-                                                ),
-                                          iconLeft: false,
-                                          hasColor: isLoading ? true : false,
-                                          bgColor: Colors.blueGrey,
-                                        ),
-                                      ),
-                                    ]))))))));
+                                      iconLeft: false,
+                                      hasColor:
+                                          forgotPassIsLoading ? true : false,
+                                      bgColor: Colors.blueGrey,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        child: Text(
+                          "Forgot Password?",
+                          style: TextStyle(
+                              color: Colors.indigo,
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      Center(
+                        child: CustomButton(
+                          title: isLoading ? "" : "  SIGN IN  ",
+                          onPress: isLoading
+                              ? null
+                              : () {
+                                  if (_inEmail.text.toString().isEmpty) {
+                                    showEmptyToast("Email", context);
+                                    return;
+                                  } else if (_inPass.text.toString().isEmpty) {
+                                    showEmptyToast("Password", context);
+                                    return;
+                                  }
+                                  signIn(_inEmail.text, _inPass.text, context);
+                                },
+                          icon: isLoading
+                              ? CupertinoActivityIndicator(radius: 20)
+                              : Icon(
+                                  Icons.arrow_forward,
+                                  color: Colors.white,
+                                ),
+                          iconLeft: false,
+                          hasColor: isLoading ? true : false,
+                          bgColor: Colors.blueGrey,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -507,6 +597,7 @@ class _CusSignUpState extends State<CusSignUp> {
           mData.putIfAbsent("Email", () => _upEmail.text);
           mData.putIfAbsent("Type", () => "Customer");
           mData.putIfAbsent("Uid", () => user.uid);
+          mData.putIfAbsent("State", () => "Current");
 
           Firestore.instance
               .collection("Customer")
@@ -843,6 +934,7 @@ class _MechSignUpState extends State<MechSignUp> {
           m.putIfAbsent("Rating", () => "0.00");
           m.putIfAbsent("Reviews", () => "0");
           m.putIfAbsent("Mech Uid", () => user.uid);
+          m.putIfAbsent("State", () => "Review");
 
           Map<String, String> allJobs = Map();
           allJobs.putIfAbsent("Total Job", () => "0");
