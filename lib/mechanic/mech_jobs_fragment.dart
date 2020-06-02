@@ -222,13 +222,17 @@ class _ButtonConfirmState extends State<ButtonConfirm> {
           mName +
           " and shall be available soonest. Thanks for using FABAT";
 
-      final Map<String, String> sentMessage = Map();
+      final Map<String, Object> sentMessage = Map();
       sentMessage.putIfAbsent("notification_message", () => sent);
       sentMessage.putIfAbsent("notification_time", () => thePresentTime());
+      sentMessage.putIfAbsent(
+          "Timestamp", () => DateTime.now().millisecondsSinceEpoch);
 
-      final Map<String, String> receivedMessage = Map();
+      final Map<String, Object> receivedMessage = Map();
       receivedMessage.putIfAbsent("notification_message", () => received);
       receivedMessage.putIfAbsent("notification_time", () => thePresentTime());
+      receivedMessage.putIfAbsent(
+          "Timestamp", () => DateTime.now().millisecondsSinceEpoch);
 
       Map<String, Object> valuesToMech = Map();
       valuesToMech.putIfAbsent("Trans Confirmation", () => "Confirmed");

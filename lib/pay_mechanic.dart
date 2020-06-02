@@ -214,7 +214,7 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
     String amount_ = amountController.text;
 
     //updates jobs on both side
-    final Map<String, String> valuesToCustomer = Map();
+    final Map<String, Object> valuesToCustomer = Map();
     valuesToCustomer.putIfAbsent("Mech Name", () => mech.name);
     valuesToCustomer.putIfAbsent("Customer Name", () => mName);
     valuesToCustomer.putIfAbsent("Mech UID", () => mech.uid);
@@ -229,8 +229,10 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
     valuesToCustomer.putIfAbsent("Trans Confirmation", () => "Unconfirmed");
     valuesToCustomer.putIfAbsent("Mech Confirmation", () => "Unconfirmed");
     valuesToCustomer.putIfAbsent("hasReviewed", () => "False");
+    valuesToCustomer.putIfAbsent(
+        "Timestamp", () => DateTime.now().millisecondsSinceEpoch);
 
-    Map<String, String> valuesToMech = Map();
+    Map<String, Object> valuesToMech = Map();
     valuesToMech.putIfAbsent("Customer UID", () => mUID);
     valuesToMech.putIfAbsent("Customer Name", () => mName);
     valuesToMech.putIfAbsent("Customer Number", () => mPhone);
@@ -242,6 +244,8 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
     valuesToMech.putIfAbsent("Trans ID", () => TransactionID.toString());
     valuesToMech.putIfAbsent("Trans Confirmation", () => "Unconfirmed");
     valuesToMech.putIfAbsent("Mech Confirmation", () => "Unconfirmed");
+    valuesToMech.putIfAbsent(
+        "Timestamp", () => DateTime.now().millisecondsSinceEpoch);
 
     int aa = int.parse(t3) + 1;
     int bb = int.parse(t4) + int.parse(amount_);
@@ -264,13 +268,17 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
         carController.text +
         " and has been withdrawn from your Card. Thanks for using FABAT";
 
-    final Map<String, String> sentMessage = Map();
+    final Map<String, Object> sentMessage = Map();
     sentMessage.putIfAbsent("notification_message", () => made);
     sentMessage.putIfAbsent("notification_time", () => now);
+    sentMessage.putIfAbsent(
+        "Timestamp", () => DateTime.now().millisecondsSinceEpoch);
 
-    final Map<String, String> receivedMessage = Map();
+    final Map<String, Object> receivedMessage = Map();
     receivedMessage.putIfAbsent("notification_message", () => received);
     receivedMessage.putIfAbsent("notification_time", () => now);
+    receivedMessage.putIfAbsent(
+        "Timestamp", () => DateTime.now().millisecondsSinceEpoch);
 
     showCupertinoDialog(
         context: context,

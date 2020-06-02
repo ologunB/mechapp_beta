@@ -164,7 +164,7 @@ class _SignInPageState extends State<SignInPage> {
           String type = document.data["Type"];
           String state = document.data["State"];
 
-          if (state == "Review") {
+          if (state == "Blocked") {
             showCupertinoDialog(
                 context: context,
                 builder: (_) {
@@ -175,9 +175,9 @@ class _SignInPageState extends State<SignInPage> {
                       style: TextStyle(color: Colors.black, fontSize: 18),
                     ),
                     content: Text(
-                      "Your Account has not been blocked for going against the FABAT rules. Check with the Admin through our various channels.",
+                      "Your Account has been blocked for going against the FABAT rules. Check with the Admin through our various channels.",
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.black, fontSize: 16),
+                      style: TextStyle(color: Colors.red, fontSize: 16),
                     ),
                     actions: <Widget>[
                       Center(
@@ -207,8 +207,11 @@ class _SignInPageState extends State<SignInPage> {
                   );
                 });
             _firebaseAuth.signOut();
+            setState(() {
+              isLoading = false;
+            });
             return;
-          } else if (state == "Blocked") {
+          } else if (state == "Review") {
             showCupertinoDialog(
                 context: context,
                 builder: (_) {
@@ -216,10 +219,10 @@ class _SignInPageState extends State<SignInPage> {
                     title: Text(
                       "Notice",
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.black, fontSize: 18),
+                      style: TextStyle(color: Colors.red, fontSize: 18),
                     ),
                     content: Text(
-                      "Your Account has not been approved and as it is under review. Check again in the next 24 hours!",
+                      "Your Account has not been approved as it is under review. Check again in the next 24 hours!",
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.black, fontSize: 16),
                     ),
@@ -251,6 +254,9 @@ class _SignInPageState extends State<SignInPage> {
                   );
                 });
             _firebaseAuth.signOut();
+            setState(() {
+              isLoading = false;
+            });
             return;
           } else {
             Navigator.of(context).pushReplacement(
@@ -598,6 +604,8 @@ class _CusSignUpState extends State<CusSignUp> {
           mData.putIfAbsent("Type", () => "Customer");
           mData.putIfAbsent("Uid", () => user.uid);
           mData.putIfAbsent("State", () => "Current");
+          mData.putIfAbsent(
+              "Timestamp", () => DateTime.now().millisecondsSinceEpoch);
 
           Firestore.instance
               .collection("Customer")
@@ -621,31 +629,6 @@ class _CusSignUpState extends State<CusSignUp> {
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.black, fontSize: 20),
                     ),
-                    actions: <Widget>[
-                      /*Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(5.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(50),
-                                color: primaryColor),
-                            child: FlatButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: Text(
-                                "OK",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),*/
-                    ],
                   );
                 });
             setState(() {
@@ -935,6 +918,8 @@ class _MechSignUpState extends State<MechSignUp> {
           m.putIfAbsent("Reviews", () => "0");
           m.putIfAbsent("Mech Uid", () => user.uid);
           m.putIfAbsent("State", () => "Review");
+          m.putIfAbsent(
+              "Timestamp", () => DateTime.now().millisecondsSinceEpoch);
 
           Map<String, String> allJobs = Map();
           allJobs.putIfAbsent("Total Job", () => "0");

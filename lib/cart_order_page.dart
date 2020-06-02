@@ -392,14 +392,18 @@ class _OrderNowPageState extends State<OrderNowPage>
         "Trans Description", () => "Payment for Items");
     valuesToCustomer.putIfAbsent("Trans ID", () => payTransactID);
     valuesToCustomer.putIfAbsent("Trans Status", () => "Processing");
+    valuesToCustomer.putIfAbsent(
+        "Timestamp", () => DateTime.now().millisecondsSinceEpoch);
 
     String made = "You have made a payment of ₦ " +
         (widget.total * 1.1).floor().toString() +
         " and has been withdrawn from your Card. Thanks for using FABAT";
 
-    final Map<String, String> sentMessage = Map();
+    final Map<String, Object> sentMessage = Map();
     sentMessage.putIfAbsent("notification_message", () => made);
     sentMessage.putIfAbsent("notification_time", () => thePresentTime());
+    sentMessage.putIfAbsent(
+        "Timestamp", () => DateTime.now().millisecondsSinceEpoch);
 
     showCupertinoDialog(
         context: context,
