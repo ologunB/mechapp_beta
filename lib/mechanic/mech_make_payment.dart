@@ -99,7 +99,7 @@ class _MechMakePaymentState extends State<MechMakePayment> {
       ..acceptAchPayments = false
       ..acceptGHMobileMoneyPayments = false
       ..acceptUgMobileMoneyPayments = false
-      ..staging = true
+      ..staging = false
       ..isPreAuth = true
       ..displayFee = true;
 

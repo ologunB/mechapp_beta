@@ -25,45 +25,40 @@ class MechMainPage extends StatefulWidget {
 class _MechMainPageState extends State<MechMainPage> {
   final menu = new Menu(
     items: [
-      new MenuItem(
+      MenuItem(
         id: 'Home',
         title: 'Home',
-        icon: IconData(0xe88a, fontFamily: 'MaterialIcons'),
+        icon: Icons.home,
       ),
-      new MenuItem(
+      MenuItem(
         id: 'Profile',
         title: 'My Profile',
-        icon: IconData(0xe7fd, fontFamily: 'MaterialIcons'),
+        icon: Icons.person,
       ),
-      new MenuItem(
+      MenuItem(
         id: 'My Jobs',
         title: 'My Jobs',
-        icon: IconData(0xe7ee, fontFamily: 'MaterialIcons'),
+        icon: Icons.group_work,
       ),
-      new MenuItem(
-        id: 'Notifications',
-        title: 'Notifications',
-        icon: IconData(0xe7f4, fontFamily: 'MaterialIcons'),
-      ),
-      new MenuItem(
-        id: 'Help',
-        title: 'Help',
-        icon: IconData(0xe932, fontFamily: 'MaterialIcons'),
-      ),
-      new MenuItem(
+      MenuItem(
         id: 'Make Payment',
         title: 'Make Payment',
         icon: Icons.payment,
       ),
-      new MenuItem(
+      MenuItem(
         id: 'Request Payment',
         title: 'Request Payment',
         icon: Icons.assignment_return,
       ),
-      new MenuItem(
+      MenuItem(
+        id: 'Help',
+        title: 'Help',
+        icon: Icons.help,
+      ),
+      MenuItem(
         id: 'Contact Us',
         title: 'Contact Us',
-        icon: IconData(0xe0d0, fontFamily: 'MaterialIcons'),
+        icon: Icons.contact_mail,
       )
     ],
   );
@@ -75,10 +70,9 @@ class _MechMainPageState extends State<MechMainPage> {
     MechHomeFragment(),
     MechProfileFragment(),
     MechJobsF(),
-    NotificationF(),
-    HelpF(),
     MechMakePayment(),
     MechRequestPayment(),
+    HelpF(),
     ContactUsF()
   ];
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
@@ -169,7 +163,7 @@ class _MechMainPageState extends State<MechMainPage> {
                           mName = snapshot.data;
 
                           return Text(
-                            mName,
+                            mName ?? "",
                             style: Theme.of(context)
                                 .textTheme
                                 .subhead
@@ -183,7 +177,7 @@ class _MechMainPageState extends State<MechMainPage> {
                           mEmail = snapshot.data;
 
                           return Text(
-                            mEmail,
+                            mEmail ?? "",
                             style:
                                 Theme.of(context).textTheme.subtitle.copyWith(
                                       color: Colors.white.withAlpha(200),
@@ -280,7 +274,7 @@ class _MechMainPageState extends State<MechMainPage> {
                         padding: const EdgeInsets.only(left: 10.0),
                         child: Text(
                           "Logout",
-                          style: TextStyle(color: Colors.white, fontSize: 20),
+                          style: TextStyle(color: Colors.white, fontSize: 17),
                         ),
                       )
                     ],
@@ -315,7 +309,7 @@ class _MechMainPageState extends State<MechMainPage> {
                       padding: const EdgeInsets.only(left: 10.0),
                       child: Text(
                         "Change Password",
-                        style: TextStyle(color: Colors.white, fontSize: 20),
+                        style: TextStyle(color: Colors.white, fontSize: 17),
                       ),
                     )
                   ],
@@ -353,8 +347,24 @@ class _MechMainPageState extends State<MechMainPage> {
         ],
         cornerRadius: 50,
         appBar: AppBarProps(
-          title: Text(title),
-        ),
+            title: Text(title),
+            actions: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    CupertinoPageRoute(
+                      builder: (context) => NotificationF(),
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Icon(Icons.notifications),
+                ),
+              )
+            ],
+            elevation: 0.0),
         menuView: MenuView(
           menu: menu,
           selectorColor: Colors.blue,
@@ -380,30 +390,25 @@ class _MechMainPageState extends State<MechMainPage> {
                 title = selectedMenuItemId;
                 currentWidget = pages[2];
               });
-            } else if (itemId == "Notifications") {
-              setState(() {
-                title = selectedMenuItemId;
-                currentWidget = pages[3];
-              });
             } else if (itemId == "Help") {
-              setState(() {
-                title = selectedMenuItemId;
-                currentWidget = pages[4];
-              });
-            } else if (itemId == "Make Payment") {
               setState(() {
                 title = selectedMenuItemId;
                 currentWidget = pages[5];
               });
+            } else if (itemId == "Make Payment") {
+              setState(() {
+                title = selectedMenuItemId;
+                currentWidget = pages[3];
+              });
             } else if (itemId == "Request Payment") {
               setState(() {
                 title = selectedMenuItemId;
-                currentWidget = pages[6];
+                currentWidget = pages[4];
               });
             } else if (itemId == "Contact Us") {
               setState(() {
                 title = selectedMenuItemId;
-                currentWidget = pages[7];
+                currentWidget = pages[6];
               });
             }
           },

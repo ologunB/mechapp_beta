@@ -31,47 +31,42 @@ class _CusMainPageState extends State<CusMainPage> {
       MenuItem(
         id: 'Home',
         title: 'Home',
-        icon: IconData(0xe88a, fontFamily: 'MaterialIcons'),
+        icon: Icons.home,
       ),
       MenuItem(
         id: 'My Garage',
         title: 'My Garage',
-        icon: IconData(0xe531, fontFamily: 'MaterialIcons'),
+        icon: Icons.directions_car,
       ),
       MenuItem(
         id: 'Nearby Services',
         title: 'Mechanic/Service Nearby',
-        icon: IconData(0xe55e, fontFamily: 'MaterialIcons'),
+        icon: Icons.my_location,
       ),
       MenuItem(
         id: 'Shop',
         title: 'Shop',
-        icon: IconData(0xeb3f, fontFamily: 'MaterialIcons'),
+        icon: Icons.local_mall,
       ),
       MenuItem(
         id: 'Orders',
         title: 'Orders',
-        icon: IconData(0xeb3f, fontFamily: 'MaterialIcons'),
+        icon: Icons.assignment,
       ),
       MenuItem(
         id: 'My Jobs',
         title: 'My Jobs',
-        icon: IconData(0xe7ee, fontFamily: 'MaterialIcons'),
-      ),
-      MenuItem(
-        id: 'Notifications',
-        title: 'Notifications',
-        icon: IconData(0xe7f4, fontFamily: 'MaterialIcons'),
+        icon: Icons.group_work,
       ),
       MenuItem(
         id: 'Help',
         title: 'Help',
-        icon: IconData(0xe932, fontFamily: 'MaterialIcons'),
+        icon: Icons.help,
       ),
       MenuItem(
         id: 'Contact Us',
         title: 'Contact Us',
-        icon: IconData(0xe0d0, fontFamily: 'MaterialIcons'),
+        icon: Icons.contact_mail,
       )
     ],
   );
@@ -84,9 +79,10 @@ class _CusMainPageState extends State<CusMainPage> {
     MyGarage(),
     NearbyF(),
     ShopContainer("main"),
-    MainCart(),
+    MainCart(
+      main: "main",
+    ),
     MyJobsF(),
-    NotificationF(),
     HelpF(),
     ContactUsF()
   ];
@@ -138,7 +134,7 @@ class _CusMainPageState extends State<CusMainPage> {
     mUID = await uid;
   }
 
-  bool isSearchingShop = false;
+  // bool isSearchingShop = false;
   @override
   Widget build(BuildContext context) {
     Widget _footerView() {
@@ -196,7 +192,7 @@ class _CusMainPageState extends State<CusMainPage> {
                         padding: const EdgeInsets.only(left: 10.0),
                         child: Text(
                           "Logout",
-                          style: TextStyle(color: Colors.white, fontSize: 20),
+                          style: TextStyle(color: Colors.white, fontSize: 18),
                         ),
                       )
                     ],
@@ -257,7 +253,7 @@ class _CusMainPageState extends State<CusMainPage> {
                       padding: const EdgeInsets.only(left: 10.0),
                       child: Text(
                         "Change Password",
-                        style: TextStyle(color: Colors.white, fontSize: 20),
+                        style: TextStyle(color: Colors.white, fontSize: 18),
                       ),
                     )
                   ],
@@ -299,7 +295,7 @@ class _CusMainPageState extends State<CusMainPage> {
                           mName = snapshot.data;
 
                           return Text(
-                            mName,
+                            mName ?? "",
                             style: Theme.of(context)
                                 .textTheme
                                 .subhead
@@ -313,7 +309,7 @@ class _CusMainPageState extends State<CusMainPage> {
                           mEmail = snapshot.data;
 
                           return Text(
-                            mEmail,
+                            mEmail ?? "",
                             style:
                                 Theme.of(context).textTheme.subtitle.copyWith(
                                       color: Colors.white.withAlpha(200),
@@ -360,7 +356,22 @@ class _CusMainPageState extends State<CusMainPage> {
                 spreadRadius: 5.0)
           ],
           cornerRadius: 50,
-          appBar: AppBarProps(title: Text(title), elevation: 0.0),
+          appBar: AppBarProps(title: Text(title), elevation: 0.0, actions: [
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                    builder: (context) => NotificationF(),
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Icon(Icons.notifications),
+              ),
+            )
+          ]),
           menuView: MenuView(
             menu: menu,
             selectorColor: Colors.blue,
@@ -400,20 +411,15 @@ class _CusMainPageState extends State<CusMainPage> {
                   title = selectedMenuItemId;
                   currentWidget = pages[5];
                 });
-              } else if (itemId == "Notifications") {
+              } else if (itemId == "Help") {
                 setState(() {
                   title = selectedMenuItemId;
                   currentWidget = pages[6];
                 });
-              } else if (itemId == "Help") {
-                setState(() {
-                  title = selectedMenuItemId;
-                  currentWidget = pages[7];
-                });
               } else if (itemId == "Contact Us") {
                 setState(() {
                   title = selectedMenuItemId;
-                  currentWidget = pages[8];
+                  currentWidget = pages[7];
                 });
               }
             },

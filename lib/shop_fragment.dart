@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:mechapp/each_product.dart';
 import 'package:mechapp/utils/my_models.dart';
 import 'package:mechapp/utils/type_constants.dart';
@@ -10,7 +11,9 @@ import 'main_cart.dart';
 
 class ShopContainer extends StatefulWidget {
   String from;
+
   ShopContainer(this.from);
+
   @override
   _ShopContainerState createState() => _ShopContainerState();
 }
@@ -59,7 +62,7 @@ void onSearchProduct(String val, BuildContext context, setState) {
       });
     }
   } else {
-    showCenterToast("Geting items", context);
+    showCenterToast("Getting items", context);
   }
 }
 
@@ -121,21 +124,27 @@ class _ShopContainerState extends State<ShopContainer>
                     ]),
           centerTitle: true,
           actions: <Widget>[
-            StatefulBuilder(
-              builder: (context, _setState) => IconButton(
-                  icon: isSearchingShop
-                      ? Icon(Icons.close, color: Colors.white)
-                      : Icon(Icons.search, color: Colors.white),
-                  onPressed: () {
-                    _setState(() {
-                      setState(() {
-                        isSearchingShop = !isSearchingShop;
+            IconButton(
+                icon: isSearchingShop
+                    ? Icon(Icons.close, color: Colors.white)
+                    : Icon(Icons.search, color: Colors.white),
+                onPressed: () {
+                  isSearchingShop = !isSearchingShop;
+                  searchShopController.clear();
 
-                        searchShopController.clear();
-                      });
-                    });
-                  }),
-            )
+                  if (isSearchingShop) {
+                    noItemFound = false;
+                    productVisible = false;
+                    searchVisible = true;
+                    FocusScope.of(context).requestFocus();
+                  } else {
+                    noItemFound = false;
+                    productVisible = true;
+                    searchVisible = false;
+                    FocusScope.of(context).unfocus();
+                  }
+                  setState(() {});
+                }),
           ],
         ),
         floatingActionButton: Container(
@@ -150,7 +159,7 @@ class _ShopContainerState extends State<ShopContainer>
                 CupertinoPageRoute(
                   fullscreenDialog: true,
                   builder: (context) {
-                    return MainCart();
+                    return MainCart(main: 'product');
                   },
                 ),
               );
@@ -295,17 +304,23 @@ Widget listBuilder(List<ShopItem> tempList, BuildContext context) {
   return Container(
     color: Color(0xb090A1AE),
     height: MediaQuery.of(context).size.height,
-    child: GridView.builder(
+    child:
+
+
+
+    StaggeredGridView.count(
       shrinkWrap: true,
-      itemCount: tempList.length,
-      itemBuilder: (context, index) {
+      crossAxisCount: 4,
+      // I only need two card horizontally
+      children: tempList.map<Widget>((item) {
+        //Do you need to go somewhere when you tap on this card, wrap using InkWell and add your route
         return GestureDetector(
           onTap: () {
             Navigator.push(
               context,
               CupertinoPageRoute(
                 builder: (context) => EachProduct(
-                  shopItem: tempList[index],
+                  shopItem: item,
                 ),
               ),
             );
@@ -318,18 +333,18 @@ Widget listBuilder(List<ShopItem> tempList, BuildContext context) {
                   Padding(
                       padding: EdgeInsets.all(4.0),
                       child: CachedNetworkImage(
-                        imageUrl: tempList[index].images[0],
+                        imageUrl: item.images[0],
                         height: 100,
                         width: 100,
                         placeholder: (context, url) =>
                             CircularProgressIndicator(),
                         errorWidget: (context, url, error) => Icon(Icons.error),
                       )),
-                  Text(tempList[index].name,
+                  Text(item.name,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 18, color: primaryColor)),
-                  Text("\₦ " + tempList[index].price,
+                  Text("\₦ " + item.price,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                           fontSize: 22,
@@ -344,7 +359,7 @@ Widget listBuilder(List<ShopItem> tempList, BuildContext context) {
                     ),
                   ),
                   Text(
-                    tempList[index].soldBy,
+                    item.soldBy,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                         fontSize: 22,
@@ -356,9 +371,12 @@ Widget listBuilder(List<ShopItem> tempList, BuildContext context) {
             ),
           ),
         );
-      },
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2, childAspectRatio: .8),
+      }).toList(),
+      staggeredTiles: tempList
+          .map<StaggeredTile>((_) => StaggeredTile.fit(2))
+          .toList(),
+      mainAxisSpacing: 3.0,
+      crossAxisSpacing: 4.0,
     ),
   );
 }

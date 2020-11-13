@@ -7,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 import 'package:mechapp/cus_main.dart';
 import 'package:mechapp/dropdown_noti_cate.dart';
 import 'package:mechapp/get_location_from_address.dart';
@@ -29,60 +30,66 @@ class LogOn extends StatefulWidget {
 class _LogOnState extends State<LogOn> with SingleTickerProviderStateMixin {
   @override
   void initState() {
-    super.initState();
     _tabController = new TabController(vsync: this, length: 2);
+
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          elevation: 0.0,
-          iconTheme: IconThemeData(color: Colors.white, size: 28),
-          centerTitle: true,
-          title: TabBar(
-            controller: _tabController,
-            unselectedLabelColor: Colors.blueAccent,
-            labelColor: Colors.white,
-            labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            unselectedLabelStyle:
-                TextStyle(fontSize: 18, fontWeight: FontWeight.w300),
-            indicatorColor: Colors.white,
-            indicator: BoxDecoration(),
-            tabs: [
-              Tab(
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: Text(
-                    "Sign In",
+    return GestureDetector(
+      onTap: () {
+        offKeyboard(context);
+      },
+      child: DefaultTabController(
+        length: 2,
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            elevation: 0.0,
+            iconTheme: IconThemeData(color: Colors.white, size: 28),
+            centerTitle: true,
+            title: TabBar(
+              controller: _tabController,
+              unselectedLabelColor: Colors.blueAccent,
+              labelColor: Colors.white,
+              labelStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              unselectedLabelStyle:
+                  TextStyle(fontSize: 18, fontWeight: FontWeight.w300),
+              indicatorColor: Colors.white,
+              indicator: BoxDecoration(),
+              tabs: [
+                Tab(
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      "Sign In",
+                    ),
                   ),
                 ),
-              ),
-              Tab(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Sign Up",
+                Tab(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Sign Up",
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        body: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-                image: AssetImage(
-                  "assets/images/bg_image.jpg",
-                ),
-                fit: BoxFit.fill),
-          ),
-          child: TabBarView(
-            children: [SignInPage(), SignUpPage()],
-            controller: _tabController,
+          body: Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                  image: AssetImage(
+                    "assets/images/bg_image.jpg",
+                  ),
+                  fit: BoxFit.fill),
+            ),
+            child: TabBarView(
+              children: [SignInPage(), SignUpPage()],
+              controller: _tabController,
+            ),
           ),
         ),
       ),
@@ -98,11 +105,13 @@ class SignInPage extends StatefulWidget {
 class _SignInPageState extends State<SignInPage> {
   TextEditingController _inEmail = TextEditingController();
   TextEditingController _inPass = TextEditingController();
-  TextEditingController _inForgotPass = TextEditingController();
+  TextEditingController _inForgotPassEmail = TextEditingController();
   bool isLoading = false;
-  bool forgotPassIsLoading = false;
+
+  // bool forgotPassIsLoading = false;
 
   Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
   Future signIn(String email, String password, context) async {
     setState(() {
       isLoading = true;
@@ -117,7 +126,7 @@ class _SignInPageState extends State<SignInPage> {
           setState(() {
             isLoading = false;
           });
-          showCupertinoDialog(
+          showDialog(
               context: context,
               builder: (_) {
                 return CupertinoAlertDialog(
@@ -127,29 +136,9 @@ class _SignInPageState extends State<SignInPage> {
                     style: TextStyle(color: Colors.black, fontSize: 20),
                   ),
                   actions: <Widget>[
-                    Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(5.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(50),
-                              color: primaryColor),
-                          child: FlatButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text(
-                              "OK",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
+                    CustomButton(title: "OK", onPress: (){
+                      Navigator.pop(context);
+                    })
                   ],
                 );
               });
@@ -164,8 +153,10 @@ class _SignInPageState extends State<SignInPage> {
           String type = document.data["Type"];
           String state = document.data["State"];
 
+          showToast(state, context);
+
           if (state == "Blocked") {
-            showCupertinoDialog(
+            showDialog(
                 context: context,
                 builder: (_) {
                   return CupertinoAlertDialog(
@@ -212,7 +203,7 @@ class _SignInPageState extends State<SignInPage> {
             });
             return;
           } else if (state == "Review") {
-            showCupertinoDialog(
+            showDialog(
                 context: context,
                 builder: (_) {
                   return CupertinoAlertDialog(
@@ -313,210 +304,212 @@ class _SignInPageState extends State<SignInPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(18.0),
-      child: Center(
-        child: Card(
-          elevation: 5,
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 25.0),
-            child: SingleChildScrollView(
-              child: Container(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Center(
-                        child: Padding(
-                          padding: EdgeInsets.only(bottom: 8.0),
-                          child: Text(
-                            "Sign In",
-                            style: TextStyle(
-                                fontSize: 20,
-                                color: primaryColor,
-                                fontWeight: FontWeight.w700),
+    return LoadingOverlay(
+      progressIndicator: CupertinoActivityIndicator(radius: 20),
+      isLoading: isLoading,
+      color: Colors.grey,
+      child: Padding(
+        padding: EdgeInsets.all(18.0),
+        child: Center(
+          child: Card(
+            elevation: 5,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 25.0),
+              child: SingleChildScrollView(
+                child: Container(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Center(
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: 8.0),
+                            child: Text(
+                              "Sign In",
+                              style: TextStyle(
+                                  fontSize: 20,
+                                  color: primaryColor,
+                                  fontWeight: FontWeight.w700),
+                            ),
                           ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: CupertinoTextField(
-                          controller: _inEmail,
-                          placeholder: "Email",
-                          placeholderStyle:
-                              TextStyle(fontWeight: FontWeight.w400),
-                          keyboardType: TextInputType.emailAddress,
-                          padding: EdgeInsets.all(10),
-                          style: TextStyle(fontSize: 20, color: Colors.black),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: CupertinoTextField(
+                            controller: _inEmail,
+                            placeholder: "Email",
+                            placeholderStyle:
+                                TextStyle(fontWeight: FontWeight.w400),
+                            keyboardType: TextInputType.emailAddress,
+                            padding: EdgeInsets.all(10),
+                            style: TextStyle(fontSize: 20, color: Colors.black),
+                          ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: CupertinoTextField(
-                          controller: _inPass,
-                          placeholder: "Password",
-                          padding: EdgeInsets.all(10),
-                          placeholderStyle:
-                              TextStyle(fontWeight: FontWeight.w400),
-                          obscureText: true,
-                          style: TextStyle(fontSize: 20, color: Colors.black),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: CupertinoTextField(
+                            controller: _inPass,
+                            placeholder: "Password",
+                            padding: EdgeInsets.all(10),
+                            placeholderStyle:
+                                TextStyle(fontWeight: FontWeight.w400),
+                            obscureText: true,
+                            style: TextStyle(fontSize: 20, color: Colors.black),
+                          ),
                         ),
-                      ),
-                      MaterialButton(
-                        onPressed: () {
-                          showDialog(
-                            barrierDismissible: true,
-                            context: context,
-                            builder: (_) => CupertinoAlertDialog(
-                              title: Column(
-                                children: <Widget>[
-                                  Text("Enter Email"),
-                                ],
-                              ),
-                              content: CupertinoTextField(
-                                controller: _inForgotPass,
-                                placeholder: "Email",
-                                padding: EdgeInsets.all(10),
-                                keyboardType: TextInputType.emailAddress,
-                                placeholderStyle:
-                                    TextStyle(fontWeight: FontWeight.w300),
-                                style: TextStyle(
-                                    fontSize: 20, color: Colors.black),
-                              ),
-                              actions: <Widget>[
-                                Center(
-                                  child: StatefulBuilder(
-                                    builder: (context, _setState) =>
-                                        CustomButton(
-                                      title: forgotPassIsLoading
-                                          ? ""
-                                          : "Reset Password",
-                                      onPress: forgotPassIsLoading
-                                          ? null
-                                          : () async {
-                                              setState(() {
-                                                forgotPassIsLoading = true;
-                                              });
-                                              await _firebaseAuth
-                                                  .sendPasswordResetEmail(
-                                                      email: _inForgotPass.text)
-                                                  .then((value) {
-                                                _setState(() {
-                                                  forgotPassIsLoading = true;
-                                                });
-                                                Navigator.pop(context);
-                                                showCupertinoDialog(
-                                                    context: context,
-                                                    builder: (_) {
-                                                      return CupertinoAlertDialog(
-                                                        title: Text(
-                                                          "Reset email sent!",
-                                                          textAlign:
-                                                              TextAlign.center,
-                                                          style: TextStyle(
+                        MaterialButton(
+                          onPressed: () {
+                            showDialog(
+                              barrierDismissible: true,
+                              context: context,
+                              builder: (_) => CupertinoAlertDialog(
+                                title: Column(
+                                  children: <Widget>[
+                                    Text("Enter Email"),
+                                  ],
+                                ),
+                                content: CupertinoTextField(
+                                  controller: _inForgotPassEmail,
+                                  placeholder: "Email",
+                                  padding: EdgeInsets.all(10),
+                                  keyboardType: TextInputType.emailAddress,
+                                  placeholderStyle:
+                                      TextStyle(fontWeight: FontWeight.w300),
+                                  style: TextStyle(
+                                      fontSize: 20, color: Colors.black),
+                                ),
+                                actions: <Widget>[
+                                  Center(
+                                    child: CustomButton(
+                                      title: "Reset Password",
+                                      onPress: () async {
+                                        if (_inForgotPassEmail.text.isEmpty) {
+                                          showEmptyToast("Email", context);
+                                          return;
+                                        }
+                                        Navigator.pop(context);
+
+                                        setState(() {
+                                          isLoading = true;
+                                        });
+
+                                        await _firebaseAuth
+                                            .sendPasswordResetEmail(
+                                                email: _inForgotPassEmail.text)
+                                            .then((value) {
+                                          _inForgotPassEmail.text = "";
+
+                                          setState(() {
+                                            isLoading = false;
+                                          });
+                                          showDialog(
+                                              context: context,
+                                              builder: (_) {
+                                                return CupertinoAlertDialog(
+                                                  title: Text(
+                                                    "Reset email sent!",
+                                                    textAlign: TextAlign.center,
+                                                    style: TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 20),
+                                                  ),
+                                                  actions: <Widget>[
+                                                    Center(
+                                                      child: Padding(
+                                                        padding:
+                                                            EdgeInsets.all(5.0),
+                                                        child: Container(
+                                                          decoration: BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          50),
                                                               color:
-                                                                  Colors.black,
-                                                              fontSize: 20),
-                                                        ),
-                                                        actions: <Widget>[
-                                                          Center(
-                                                            child: Padding(
-                                                              padding:
-                                                                  EdgeInsets
-                                                                      .all(5.0),
-                                                              child: Container(
-                                                                decoration: BoxDecoration(
-                                                                    borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            50),
-                                                                    color:
-                                                                        primaryColor),
-                                                                child:
-                                                                    FlatButton(
-                                                                  onPressed:
-                                                                      () {
-                                                                    Navigator.of(
-                                                                            context)
-                                                                        .pop();
-                                                                  },
-                                                                  child: Text(
-                                                                    "OK",
-                                                                    textAlign:
-                                                                        TextAlign
-                                                                            .center,
-                                                                    style: TextStyle(
-                                                                        fontSize:
-                                                                            20,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w900,
-                                                                        color: Colors
-                                                                            .white),
-                                                                  ),
-                                                                ),
-                                                              ),
+                                                                  primaryColor),
+                                                          child: FlatButton(
+                                                            onPressed: () {
+                                                              Navigator.of(
+                                                                      context)
+                                                                  .pop();
+                                                            },
+                                                            child: Text(
+                                                              "OK",
+                                                              textAlign:
+                                                                  TextAlign
+                                                                      .center,
+                                                              style: TextStyle(
+                                                                  fontSize: 20,
+                                                                  fontWeight:
+                                                                      FontWeight
+                                                                          .w900,
+                                                                  color: Colors
+                                                                      .white),
                                                             ),
                                                           ),
-                                                        ],
-                                                      );
-                                                    });
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                );
                                               });
-                                            },
-                                      icon: forgotPassIsLoading
-                                          ? CupertinoActivityIndicator(
-                                              radius: 20)
-                                          : Icon(
-                                              Icons.arrow_forward,
-                                              color: Colors.white,
-                                            ),
+                                        }).catchError((e) {
+                                          showExceptionAlertDialog(
+                                              context: context,
+                                              exception: e,
+                                              title: "Error");
+                                          _inForgotPassEmail.text = "";
+                                          setState(() {
+                                            isLoading = false;
+                                          });
+                                          return;
+                                        });
+                                      },
+                                      icon: Icon(
+                                        Icons.arrow_forward,
+                                        color: Colors.white,
+                                      ),
                                       iconLeft: false,
-                                      hasColor:
-                                          forgotPassIsLoading ? true : false,
                                       bgColor: Colors.blueGrey,
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
+                            );
+                          },
+                          child: Text(
+                            "Forgot Password?",
+                            style: TextStyle(
+                                color: Colors.indigo,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                        Center(
+                          child: CustomButton(
+                            title: "  SIGN IN  ",
+                            onPress: () {
+                              if (_inEmail.text.toString().isEmpty) {
+                                showEmptyToast("Email", context);
+                                return;
+                              } else if (_inPass.text.toString().isEmpty) {
+                                showEmptyToast("Password", context);
+                                return;
+                              }
+                              signIn(_inEmail.text, _inPass.text, context);
+                            },
+                            icon: Icon(
+                              Icons.arrow_forward,
+                              color: Colors.white,
                             ),
-                          );
-                        },
-                        child: Text(
-                          "Forgot Password?",
-                          style: TextStyle(
-                              color: Colors.indigo,
-                              fontSize: 17,
-                              fontWeight: FontWeight.w600),
+                            iconLeft: false,
+                            hasColor: isLoading ? true : false,
+                            bgColor: Colors.blueGrey,
+                          ),
                         ),
-                      ),
-                      Center(
-                        child: CustomButton(
-                          title: isLoading ? "" : "  SIGN IN  ",
-                          onPress: isLoading
-                              ? null
-                              : () {
-                                  if (_inEmail.text.toString().isEmpty) {
-                                    showEmptyToast("Email", context);
-                                    return;
-                                  } else if (_inPass.text.toString().isEmpty) {
-                                    showEmptyToast("Password", context);
-                                    return;
-                                  }
-                                  signIn(_inEmail.text, _inPass.text, context);
-                                },
-                          icon: isLoading
-                              ? CupertinoActivityIndicator(radius: 20)
-                              : Icon(
-                                  Icons.arrow_forward,
-                                  color: Colors.white,
-                                ),
-                          iconLeft: false,
-                          hasColor: isLoading ? true : false,
-                          bgColor: Colors.blueGrey,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -542,32 +535,36 @@ class _SignUpPageState extends State<SignUpPage> {
     MechSignUp(),
   ];
   Widget currentWidget = CusSignUp();
+
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: <Widget>[
-        Center(child: currentWidget),
-        Padding(
-          padding: EdgeInsets.all(11.0),
-          child: CustomButton(
-            title: _switchText,
-            onPress: () {
-              setState(() {
-                _switchIndex = _switchBool ? 0 : 1;
-                _switchText =
-                    _switchBool ? "Register as Mechanic" : "Register as User";
-                _switchBool = !_switchBool;
-                currentWidget = signUps[_switchIndex];
-              });
-            },
-            icon: Icon(
-              Icons.keyboard_arrow_down,
-              color: Colors.white,
+    return Center(
+      child: ListView(
+          shrinkWrap: true,
+        children: <Widget>[
+          Center(child: currentWidget),
+          Padding(
+            padding: EdgeInsets.all(11.0),
+            child: CustomButton(
+              title: _switchText,
+              onPress: () {
+                setState(() {
+                  _switchIndex = _switchBool ? 0 : 1;
+                  _switchText =
+                      _switchBool ? "Register as Mechanic" : "Register as User";
+                  _switchBool = !_switchBool;
+                  currentWidget = signUps[_switchIndex];
+                });
+              },
+              icon: Icon(
+                Icons.keyboard_arrow_down,
+                color: Colors.white,
+              ),
+              iconLeft: false,
             ),
-            iconLeft: false,
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -590,6 +587,30 @@ class _CusSignUpState extends State<CusSignUp> {
     setState(() {
       isLoading = true;
     });
+    showCupertinoDialog(
+        context: context,
+        builder: (_) {
+          return CupertinoAlertDialog(
+            title: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: CupertinoActivityIndicator(
+                    radius: 18,
+                  ),
+                ),
+                Text(
+                  "Loading",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.black, fontSize: 20),
+                )
+              ],
+            ),
+            actions: <Widget>[],
+          );
+        });
+
     await _firebaseAuth
         .createUserWithEmailAndPassword(email: email, password: password)
         .then((value) {
@@ -620,7 +641,9 @@ class _CusSignUpState extends State<CusSignUp> {
               .child(user.uid)
               .set(mData)
               .then((b) {
-            showCupertinoDialog(
+            Navigator.pop(context);
+
+            showDialog(
                 context: context,
                 builder: (_) {
                   return CupertinoAlertDialog(
@@ -638,6 +661,8 @@ class _CusSignUpState extends State<CusSignUp> {
           });
         });
       } else {
+        Navigator.pop(context);
+
         setState(() {
           isLoading = false;
         });
@@ -645,6 +670,8 @@ class _CusSignUpState extends State<CusSignUp> {
       }
       return;
     }).catchError((e) {
+      Navigator.pop(context);
+
       showExceptionAlertDialog(context: context, exception: e, title: "Error");
       setState(() {
         isLoading = false;
@@ -684,7 +711,8 @@ class _CusSignUpState extends State<CusSignUp> {
                     padding: EdgeInsets.all(8.0),
                     child: CupertinoTextField(
                       //decoration: InputDecoration(hintText: "Email"),
-                      controller: _upName, padding: EdgeInsets.all(10),
+                      controller: _upName,
+                      padding: EdgeInsets.all(10),
                       keyboardType: TextInputType.text,
                       placeholderStyle: TextStyle(fontWeight: FontWeight.w400),
 
@@ -698,7 +726,8 @@ class _CusSignUpState extends State<CusSignUp> {
                     child: CupertinoTextField(
                       //decoration: InputDecoration(hintText: "Email"),
                       controller: _upEmail,
-                      placeholder: "Email", padding: EdgeInsets.all(10),
+                      placeholder: "Email",
+                      padding: EdgeInsets.all(10),
                       keyboardType: TextInputType.emailAddress,
                       placeholderStyle: TextStyle(fontWeight: FontWeight.w400),
 
@@ -710,7 +739,8 @@ class _CusSignUpState extends State<CusSignUp> {
                     child: CupertinoTextField(
                       //decoration: InputDecoration(hintText: "Email"),
                       controller: _upPhoNum,
-                      placeholder: "Phone Number", padding: EdgeInsets.all(10),
+                      placeholder: "Phone Number",
+                      padding: EdgeInsets.all(10),
                       keyboardType: TextInputType.number,
                       placeholderStyle: TextStyle(fontWeight: FontWeight.w400),
 
@@ -723,7 +753,8 @@ class _CusSignUpState extends State<CusSignUp> {
                       //decoration: InputDecoration(hintText: "Password"),
                       controller: _upPass,
                       placeholder: "Password",
-                      obscureText: true, padding: EdgeInsets.all(10),
+                      obscureText: true,
+                      padding: EdgeInsets.all(10),
                       placeholderStyle: TextStyle(fontWeight: FontWeight.w400),
 
                       style: TextStyle(fontSize: 20, color: Colors.black),
@@ -755,28 +786,24 @@ class _CusSignUpState extends State<CusSignUp> {
                   ),
                   Center(
                     child: CustomButton(
-                      title: isLoading ? "" : "   SIGN UP   ",
-                      onPress: isLoading
-                          ? null
-                          : () {
-                              if (_upEmail.text.toString().isEmpty) {
-                                showEmptyToast("Email", context);
-                                return;
-                              } else if (_upPass.text.toString().isEmpty) {
-                                showEmptyToast("Password", context);
-                                return;
-                              } else if (_upName.text.toString().isEmpty) {
-                                showEmptyToast("Name", context);
-                                return;
-                              }
-                              cusSignUp(_upEmail.text, _upPass.text);
-                            },
-                      icon: isLoading
-                          ? CupertinoActivityIndicator(radius: 20)
-                          : Icon(
-                              Icons.done,
-                              color: Colors.white,
-                            ),
+                      title: "   SIGN UP   ",
+                      onPress: () {
+                        if (_upEmail.text.toString().isEmpty) {
+                          showEmptyToast("Email", context);
+                          return;
+                        } else if (_upPass.text.toString().isEmpty) {
+                          showEmptyToast("Password", context);
+                          return;
+                        } else if (_upName.text.toString().isEmpty) {
+                          showEmptyToast("Name", context);
+                          return;
+                        }
+                        cusSignUp(_upEmail.text, _upPass.text);
+                      },
+                      icon: Icon(
+                        Icons.done,
+                        color: Colors.white,
+                      ),
                       iconLeft: false,
                       hasColor: isLoading ? true : false,
                       bgColor: Colors.blueGrey,
@@ -850,7 +877,7 @@ class _MechSignUpState extends State<MechSignUp> {
   TextEditingController _upEmail = TextEditingController();
   TextEditingController _upPass = TextEditingController();
   TextEditingController _upStreetName = TextEditingController();
-  TextEditingController _upLocality = TextEditingController();
+  TextEditingController _upLocality = TextEditingController(text: " ");
   TextEditingController _upWebsite = TextEditingController();
   TextEditingController _upDescpt = TextEditingController();
 
@@ -858,6 +885,29 @@ class _MechSignUpState extends State<MechSignUp> {
     setState(() {
       isLoading = true;
     });
+    showCupertinoDialog(
+        context: context,
+        builder: (_) {
+          return CupertinoAlertDialog(
+            title: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: CupertinoActivityIndicator(
+                    radius: 18,
+                  ),
+                ),
+                Text(
+                  "Loading",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.black, fontSize: 20),
+                )
+              ],
+            ),
+            actions: <Widget>[],
+          );
+        });
 
     var _storageRef = FirebaseStorage.instance.ref();
 
@@ -902,9 +952,8 @@ class _MechSignUpState extends State<MechSignUp> {
           m.putIfAbsent("Locality", () => _upLocality.text);
           m.putIfAbsent("Description", () => _upDescpt.text ?? "Empty");
           m.putIfAbsent("Website Url", () => _upWebsite.text ?? "Empty");
-          m.putIfAbsent("Loc Latitude", () => currentLocation.latitude ?? 6.5);
-          m.putIfAbsent(
-              "LOc Longitude", () => currentLocation.longitude ?? 6.5);
+          m.putIfAbsent("Loc Latitude", () => whereLat ?? 6.5);
+          m.putIfAbsent("LOc Longitude", () => whereLong ?? 6.5);
           m.putIfAbsent("Image Url", () => "em");
           m.putIfAbsent("CAC Image Url", () => "em");
           m.putIfAbsent("PreviousImage1 Url", () => "em");
@@ -946,40 +995,17 @@ class _MechSignUpState extends State<MechSignUp> {
                 .child(user.uid)
                 .set(allJobs)
                 .then((a) {
-              showCupertinoDialog(
+              Navigator.pop(context);
+              showDialog(
                   context: context,
                   builder: (_) {
                     return CupertinoAlertDialog(
                       title: Text(
-                        "User created, Verify Email!",
+                        "Account created, Verify Email!",
                         textAlign: TextAlign.center,
                         style: TextStyle(color: Colors.black, fontSize: 20),
                       ),
-                      actions: <Widget>[
-                        /* Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(5.0),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(50),
-                                  color: primaryColor),
-                              child: FlatButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: Text(
-                                  "OK",
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w900,
-                                      color: Colors.white),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),*/
-                      ],
+                      actions: <Widget>[],
                     );
                   });
               setState(() {
@@ -1050,8 +1076,19 @@ class _MechSignUpState extends State<MechSignUp> {
                 .document(mUID)
                 .updateData({"PreviousImage1 Url": url});
           }
+        }).catchError((e) {
+          Navigator.pop(context);
+
+          showExceptionAlertDialog(
+              context: context, exception: e, title: "Error");
+          setState(() {
+            isLoading = false;
+          });
+          return;
         });
       } else {
+        Navigator.pop(context);
+
         setState(() {
           isLoading = false;
         });
@@ -1059,12 +1096,21 @@ class _MechSignUpState extends State<MechSignUp> {
       }
       return;
     }).catchError((e) {
+      Navigator.pop(context);
+
       showExceptionAlertDialog(context: context, exception: e, title: "Error");
       setState(() {
         isLoading = false;
       });
       return;
     });
+  }
+
+  @override
+  void initState() {
+    whereLong = null;
+    whereLat = null;
+    super.initState();
   }
 
   @override
@@ -1162,7 +1208,7 @@ class _MechSignUpState extends State<MechSignUp> {
                   ),
                   value: selectedCity,
                   underline: SizedBox(),
-                  items: ["Ibadan", "Lagos"].map((value) {
+                  items: cityList.map((value) {
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Padding(
@@ -1186,14 +1232,14 @@ class _MechSignUpState extends State<MechSignUp> {
                   color: Colors.black45,
                   thickness: 1,
                 ),
-                TextField(
+                /*       TextField(
                   decoration: InputDecoration(
                       hintText: "Locality",
                       labelText: "Locality",
                       labelStyle: TextStyle(color: Colors.blue)),
                   style: TextStyle(fontSize: 18),
                   controller: _upLocality,
-                ),
+                ),*/
                 TextField(
                   decoration: InputDecoration(
                       hintText: "Company's website",
@@ -1294,55 +1340,14 @@ class _MechSignUpState extends State<MechSignUp> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: CustomButton(
-                    title: isLoading ? "" : "   Register   ",
-                    onPress: isLoading
-                        ? null
-                        : () {
-                            if (_upEmail.text.toString().isEmpty) {
-                              showEmptyToast("Email", context);
-                              return;
-                            } else if (_upPass.text.toString().isEmpty) {
-                              showEmptyToast("Password", context);
-                              return;
-                            } else if (_upName.text.toString().isEmpty) {
-                              showEmptyToast("Name", context);
-                              return;
-                            } else if (_upPhoneNo.text.toString().isEmpty) {
-                              showEmptyToast("Phone Number", context);
-                              return;
-                            } else if (_upSpecify.text.toString().isEmpty) {
-                              showEmptyToast("Specification", context);
-                              return;
-                            } else if (_upCategory.text.toString().isEmpty) {
-                              showEmptyToast("Category", context);
-                              return;
-                            } else if (_upStreetName.text.toString().isEmpty) {
-                              showEmptyToast("Street name", context);
-                              return;
-                            } else if (selectedCity.isEmpty) {
-                              showEmptyToast("City", context);
-                              return;
-                            } else if (_upLocality.text.toString().isEmpty) {
-                              showEmptyToast("Locality", context);
-                              return;
-                            } else if (_cacImage == null) {
-                              showEmptyToast("CAC Image", context);
-                              return;
-                            } else if (_mainPicture == null) {
-                              showEmptyToast("Image", context);
-                              return;
-                            } else if (currentLocation == null) {
-                              showEmptyToast("Postition", context);
-                              return;
-                            }
-                            mechSignUp(context);
-                          },
-                    icon: isLoading
-                        ? CupertinoActivityIndicator(radius: 20)
-                        : Icon(
-                            Icons.done,
-                            color: Colors.white,
-                          ),
+                    title: "   Register   ",
+                    onPress: () {
+                      authenticate();
+                    },
+                    icon: Icon(
+                      Icons.done,
+                      color: Colors.white,
+                    ),
                     iconLeft: false,
                     hasColor: isLoading ? true : false,
                     bgColor: Colors.blueGrey,
@@ -1387,4 +1392,55 @@ class _MechSignUpState extends State<MechSignUp> {
       _mainPicture = img;
     });
   }
+
+  authenticate() {
+    if (_upEmail.text.toString().isEmpty) {
+      showEmptyToast("Email", context);
+      return;
+    } else if (_upPass.text.toString().isEmpty) {
+      showEmptyToast("Password", context);
+      return;
+    } else if (_upName.text.toString().isEmpty) {
+      showEmptyToast("Name", context);
+      return;
+    } else if (_upPhoneNo.text.toString().isEmpty) {
+      showEmptyToast("Phone Number", context);
+      return;
+    } else if (_upSpecify.text.toString().isEmpty) {
+      showEmptyToast("Specification", context);
+      return;
+    } else if (_upCategory.text.toString().isEmpty) {
+      showEmptyToast("Category", context);
+      return;
+    } else if (_upStreetName.text.toString().isEmpty) {
+      showEmptyToast("Street name", context);
+      return;
+    } else if (selectedCity.isEmpty) {
+      showEmptyToast("City", context);
+      return;
+    } else if (_upLocality.text.toString().isEmpty) {
+      showEmptyToast("Locality", context);
+      return;
+    } else if (_cacImage == null) {
+      showEmptyToast("CAC Image", context);
+      return;
+    } else if (_mainPicture == null) {
+      showEmptyToast("Image", context);
+      return;
+    } else if (whereLat == null) {
+      showCenterToast("Choose a Location again", context);
+      return;
+    }
+
+    mechSignUp(context);
+  }
+
+  List<String> cityList = [
+    "Ibadan",
+    "Lagos",
+    "Akure",
+    "Abuja",
+    "Portharcourt",
+    "Ogun"
+  ];
 }

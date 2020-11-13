@@ -1,28 +1,21 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import "package:google_maps_webservice/geocoding.dart";
+import 'package:google_maps_webservice/places.dart';
 import 'package:mechapp/utils/type_constants.dart';
-
-import 'libraries/custom_button.dart';
+import 'package:flutter_google_places/flutter_google_places.dart';
 
 class GetLocationFromAddress extends StatefulWidget {
   TextEditingController upStreetName;
+
   GetLocationFromAddress({this.upStreetName});
+
   @override
   _GetLocationFromAddressState createState() => _GetLocationFromAddressState();
 }
 
 class _GetLocationFromAddressState extends State<GetLocationFromAddress> {
-  LatLng locationCoordinates;
-  GoogleMapController mapController;
-  List<Marker> markers = <Marker>[];
-  LatLng _center = LatLng(7.3034138, 5.143012800000008);
-
-  void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
-  }
-
   @override
   void initState() {
     super.initState();
@@ -34,35 +27,81 @@ class _GetLocationFromAddressState extends State<GetLocationFromAddress> {
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
   }
 
+  Position currentLocation;
+
   getUserLocation() async {
-    currentLocation = await locateUser();
-    setState(() {
-      locationCoordinates =
-          LatLng(currentLocation.latitude, currentLocation.longitude);
-    });
+    try {
+      currentLocation = await locateUser();
 
-    List<Placemark> placeMark = await Geolocator().placemarkFromCoordinates(
-        currentLocation.latitude, currentLocation.longitude);
+      whereLat = currentLocation.latitude;
+      whereLong = currentLocation.longitude;
+      List<Placemark> placeMark =
+          await Geolocator().placemarkFromCoordinates(whereLat, whereLong);
+      widget.upStreetName.text =
+          placeMark[0].name + ", " + placeMark[0].locality;
 
-    setState(() {
-      markers.add(
-        Marker(
-          markerId: MarkerId("Current Location"),
-          position: LatLng(currentLocation.latitude, currentLocation.longitude),
-          icon: BitmapDescriptor.defaultMarkerWithHue(120.0),
-          onTap: () {},
-        ),
+      setState(() {});
+    } catch (e) {
+      showDialog(
+        context: context,
+        builder: (_) {
+          return CupertinoAlertDialog(
+            title: Text(
+              "Error getting Location",
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.red, fontSize: 20),
+            ),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Text("App might not function well"),
+                Icon(Icons.error)
+              ],
+            ),
+            actions: <Widget>[
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.all(5.0),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(50),
+                      color: Colors.blue,
+                    ),
+                    child: FlatButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text(
+                        "OK",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       );
-      widget.upStreetName.text = placeMark[0].name;
-
-      _center = LatLng(currentLocation.latitude, currentLocation.longitude);
-    });
+    }
   }
+
+  void onError(PlacesAutocompleteResponse response) {
+    print(response.errorMessage);
+    showCenterToast(response.errorMessage, context);
+  }
+
+  GoogleMapsPlaces _places = GoogleMapsPlaces(apiKey: kGoogleMapKey);
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         Expanded(
           child: TextField(
@@ -72,91 +111,45 @@ class _GetLocationFromAddressState extends State<GetLocationFromAddress> {
                 labelStyle: TextStyle(color: Colors.blue)),
             style: TextStyle(fontSize: 18),
             controller: widget.upStreetName,
+            readOnly: true,
+            onTap: () {
+              chooseLoca();
+            },
           ),
         ),
-        IconButton(
-          onPressed: () {
-            showDialog(
-                context: context,
-                builder: (_) => CupertinoAlertDialog(
-                      title: Text("Getting your location"),
-                      content: Container(
-                        height: MediaQuery.of(context).size.height / 1.5,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.black54,
-                            borderRadius: BorderRadius.circular(20.0),
-                          ),
-                          height: MediaQuery.of(context).size.height / 3.5,
-                          child: GoogleMap(
-                            onMapCreated: _onMapCreated,
-                            initialCameraPosition: CameraPosition(
-                              target: _center,
-                              zoom: 30.0,
-                            ),
-                            markers: Set<Marker>.of(markers),
-                          ),
-                        ),
-                      ),
-                      actions: <Widget>[
-                        Center(
-                          child: Padding(
-                            padding: EdgeInsets.all(5.0),
-                            child: Container(
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(50),
-                                  color: Colors.red),
-                              child: FlatButton(
-                                onPressed: () {
-                                  Navigator.of(context).pop();
-                                },
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: <Widget>[
-                                    Icon(
-                                      Icons.close,
-                                      color: Colors.white,
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        "Cancel",
-                                        overflow: TextOverflow.ellipsis,
-                                        textAlign: TextAlign.center,
-                                        style: TextStyle(
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.w900,
-                                            color: Colors.white),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        CustomButton(
-                          title: "OK",
-                          onPress: () {
-                            getUserLocation();
-                            setState(() {});
-                            Navigator.of(context).pop();
-                            FocusScope.of(context).unfocus();
-                          },
-                          icon: Icon(
-                            Icons.done,
-                            color: Colors.white,
-                          ),
-                          iconLeft: false,
-                        ),
-                      ],
-                    ));
-          },
-          icon: Icon(
-            Icons.location_on,
-            color: primaryColor,
-          ),
-        ),
+        InkWell(
+            onTap: () {
+              chooseLoca();
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(4.0),
+              child: Text(
+                "CHOOSE",
+                style: TextStyle(fontSize: 18, color: Colors.blue),
+              ),
+            ))
       ],
     );
+  }
+
+  chooseLoca() async {
+    Prediction p = await PlacesAutocomplete.show(
+        context: context,
+        language: "en",
+        onError: onError,
+        mode: Mode.overlay,
+        apiKey: kGoogleMapKey,
+        components: [Component(Component.country, "NG")]);
+    if (p != null) {
+      await _places.getDetailsByPlaceId(p.placeId).then((detail) {
+        whereLat = detail.result.geometry.location.lat;
+        whereLong = detail.result.geometry.location.lng;
+        widget.upStreetName.text = p.description;
+
+        setState(() {});
+      }).catchError((a) {
+        showCenterToast("No Location selected!", context);
+      });
+    }
   }
 }

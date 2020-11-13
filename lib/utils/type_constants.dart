@@ -7,6 +7,7 @@ import 'package:mechapp/libraries/toast.dart';
 
 String mUID, mEmail, mName, userType, mPhone;
 Position currentLocation;
+double whereLat, whereLong;
 
 Color primaryColor = Color.fromARGB(255, 22, 58, 78);
 Widget emptyList(String typeOf) {
@@ -76,13 +77,13 @@ List<String> categoryList = [
 
 showEmptyToast(String aa, BuildContext context) {
   Toast.show("$aa cannot be empty", context,
-      duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+      duration: Toast.LENGTH_LONG, gravity: Toast.CENTER);
   return;
 }
 
 showToast(String aa, BuildContext context) {
   Toast.show("$aa", context,
-      duration: Toast.LENGTH_LONG, gravity: Toast.BOTTOM);
+      duration: Toast.LENGTH_LONG, gravity: Toast.CENTER);
   return;
 }
 
@@ -110,3 +111,12 @@ String thePresentTime() {
 final commaFormat = new NumberFormat("#,##0", "en_US");
 String raveEncryptKey = "FLWSECK_TEST3ba765b74b1f";
 String ravePublicKey = "FLWPUBK_TEST-9ba09916a6e4e8385b9fb2036439beac-X";
+String kGoogleMapKey = "AIzaSyBW3PTaSdgjmxTuUkEe0wLZZDNdnIcyVNQ";
+
+offKeyboard(context) {
+  FocusScopeNode currentFocus = FocusScope.of(context);
+
+  if (!currentFocus.hasPrimaryFocus) {
+    currentFocus.unfocus();
+  }
+}

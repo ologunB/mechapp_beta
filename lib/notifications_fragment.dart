@@ -94,17 +94,30 @@ class _NotificationFState extends State<NotificationF> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: primaryColor,
-      child: ClipRRect(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Notifications"),
+        centerTitle: true,
+        elevation: 0.0,
+        leading: IconButton(
+            icon: Icon(Icons.arrow_back_ios),
+            onPressed: () {
+              Navigator.pop(context);
+            }),
+      ),
+
+      body: Container(
+        color: primaryColor,
+        child: ClipRRect(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+          child: Container(
+              height: double.infinity,
+              color: Color(0xb090A1AE),
+              child: _buildFutureBuilder()),
         ),
-        child: Container(
-            height: double.infinity,
-            color: Color(0xb090A1AE),
-            child: _buildFutureBuilder()),
       ),
     );
   }

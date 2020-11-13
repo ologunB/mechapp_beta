@@ -16,7 +16,9 @@ import 'libraries/toast.dart';
 
 class PayMechanicPage extends StatefulWidget {
   final EachMechanic mechanic;
+
   PayMechanicPage({Key key, @required this.mechanic}) : super(key: key);
+
   @override
   _PayMechanicPageState createState() => _PayMechanicPageState();
 }
@@ -59,7 +61,7 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
     await dataRef.once().then((snapshot) {
       var dATA = snapshot.value;
 
-      setState(() async {
+      setState(() {
         t3 = dATA['Pending Job'];
         t4 = dATA['Pending Amount'];
       });
@@ -147,7 +149,7 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
       ..acceptAchPayments = false
       ..acceptGHMobileMoneyPayments = false
       ..acceptUgMobileMoneyPayments = false
-      ..staging = true
+      ..staging = false
       ..isPreAuth = true
       ..displayFee = true;
 
@@ -291,7 +293,9 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
             ),
             content: CupertinoActivityIndicator(radius: 20),
           );
-        });
+        }).timeout(Duration(seconds: 30), onTimeout: () {
+      Navigator.pop(context);
+    });
     databaseReference
         .child("Jobs Collection")
         .child("Mechanic")
@@ -337,6 +341,7 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
   }
 
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -392,11 +397,36 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(5.0),
-              child: RaisedButton(
-                onPressed: () {
-                  scaffoldKey.currentState.showBottomSheet(
-                    (_) => Container(
+              padding: EdgeInsets.all(5.0),
+              child: CupertinoTextField(
+                prefix: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: CachedNetworkImage(
+                    imageUrl: chosenImage,
+                    height: 30,
+                    width: 30,
+                    placeholder: (_, url) =>
+                        CupertinoActivityIndicator(radius: 10),
+                    errorWidget: (_, url, error) => Container(
+                      height: 30,
+                      width: 30,
+                      decoration: new BoxDecoration(
+                        image: new DecorationImage(
+                          fit: BoxFit.fill,
+                          image: AssetImage("assets/images/car.png"),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                placeholder: "Add Car",
+                readOnly: true,
+                enabled: true,
+                controller: carController,
+                onTap: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) => Container(
                       height: MediaQuery.of(context).size.height / 3,
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -559,35 +589,9 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
                     ),
                   );
                 },
-                child: CupertinoTextField(
-                  prefix: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: CachedNetworkImage(
-                      imageUrl: chosenImage,
-                      height: 30,
-                      width: 30,
-                      placeholder: (_, url) =>
-                          CupertinoActivityIndicator(radius: 10),
-                      errorWidget: (_, url, error) => Container(
-                        height: 30,
-                        width: 30,
-                        decoration: new BoxDecoration(
-                          image: new DecorationImage(
-                            fit: BoxFit.fill,
-                            image: AssetImage("assets/images/car.png"),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  placeholder: "Add Car",
-                  enabled: false,
-                  controller: carController,
-                  padding: EdgeInsets.all(10),
-                  style: TextStyle(fontSize: 22),
-                  onTap: () {},
-                  keyboardType: TextInputType.numberWithOptions(),
-                ),
+                padding: EdgeInsets.all(10),
+                style: TextStyle(fontSize: 22),
+                keyboardType: TextInputType.numberWithOptions(),
               ),
             ),
             Padding(
@@ -627,7 +631,7 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
                   return;
                 }
 
-                showCupertinoDialog(
+                showDialog(
                     context: context,
                     builder: (_) => CupertinoAlertDialog(
                           title: Text("Confirmation!"),

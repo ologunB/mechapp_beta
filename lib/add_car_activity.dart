@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:loading_overlay/loading_overlay.dart';
 import 'package:mechapp/utils/type_constants.dart';
 
 import 'libraries/custom_button.dart';
@@ -41,117 +42,118 @@ class _AddCarActivityState extends State<AddCarActivity>
   bool isLoading = false;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
-      appBar: AppBar(
-        title: Text("Add New Car"),
-        centerTitle: true,
-        elevation: 0.0,
-        leading: IconButton(
-            icon: Icon(Icons.arrow_back_ios),
-            onPressed: () {
-              Navigator.pop(context);
-            }),
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-              image: AssetImage(
-                "assets/images/bg_image.jpg",
-              ),
-              fit: BoxFit.fill),
-          borderRadius: BorderRadius.circular(20.0),
+    return LoadingOverlay(
+      progressIndicator: CupertinoActivityIndicator(radius: 20),
+      isLoading: isLoading,
+      color: Colors.grey,
+      child: Scaffold(
+        backgroundColor: Theme.of(context).primaryColor,
+        appBar: AppBar(
+          title: Text("Add New Car"),
+          centerTitle: true,
+          elevation: 0.0,
+          leading: IconButton(
+              icon: Icon(Icons.arrow_back_ios),
+              onPressed: () {
+                Navigator.pop(context);
+              }),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Center(
-            child: Card(
-              elevation: 5,
-              child: Padding(
-                padding: EdgeInsets.all(25.0),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Container(
-                        height: 100,
-                        width: 100,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(50.0),
+        body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+                image: AssetImage(
+                  "assets/images/bg_image.jpg",
+                ),
+                fit: BoxFit.fill),
+            borderRadius: BorderRadius.circular(20.0),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Center(
+              child: Card(
+                elevation: 5,
+                child: Padding(
+                  padding: EdgeInsets.all(25.0),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Container(
+                          height: 100,
+                          width: 100,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50.0),
+                          ),
+                          child: InkWell(
+                            onTap: () {
+                              getImage();
+                            },
+                            child: _carImage == null
+                                ? Image(
+                                    image: AssetImage(
+                                        "assets/images/add_camera.png"),
+                                    height: 90,
+                                    width: 90,
+                                    fit: BoxFit.contain)
+                                : Image.file(_carImage,
+                                    height: 90, width: 90, fit: BoxFit.contain),
+                          ),
                         ),
-                        child: InkWell(
-                          onTap: () {
-                            getImage();
-                          },
-                          child: _carImage == null
-                              ? Image(
-                                  image: AssetImage(
-                                      "assets/images/add_camera.png"),
-                                  height: 90,
-                                  width: 90,
-                                  fit: BoxFit.contain)
-                              : Image.file(_carImage,
-                                  height: 90, width: 90, fit: BoxFit.contain),
+                        TextField(
+                          decoration:
+                              InputDecoration(hintText: "Car Make(Brand)"),
+                          style: TextStyle(fontSize: 20),
+                          controller: _carMake,
                         ),
-                      ),
-                      TextField(
-                        decoration:
-                            InputDecoration(hintText: "Car Make(Brand)"),
-                        style: TextStyle(fontSize: 20),
-                        controller: _carMake,
-                      ),
-                      TextField(
-                        decoration: InputDecoration(hintText: "Car Model"),
-                        style: TextStyle(fontSize: 20),
-                        controller: _carModel,
-                      ),
-                      TextField(
-                        decoration:
-                            InputDecoration(hintText: "Registration Number"),
-                        style: TextStyle(fontSize: 20),
-                        controller: _carRegNum,
-                      ),
-                      TextField(
-                        decoration: InputDecoration(hintText: "Year"),
-                        style: TextStyle(fontSize: 20),
-                        keyboardType: TextInputType.number,
-                        controller: _carDate,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            CustomButton(
-                              title: "Cancel",
-                              onPress: () {
-                                Navigator.pop(context);
-                              },
-                              icon: Icon(
-                                Icons.close,
-                                color: Colors.white,
+                        TextField(
+                          decoration: InputDecoration(hintText: "Car Model"),
+                          style: TextStyle(fontSize: 20),
+                          controller: _carModel,
+                        ),
+                        TextField(
+                          decoration:
+                              InputDecoration(hintText: "Registration Number"),
+                          style: TextStyle(fontSize: 20),
+                          controller: _carRegNum,
+                        ),
+                        TextField(
+                          decoration: InputDecoration(hintText: "Year"),
+                          style: TextStyle(fontSize: 20),
+                          keyboardType: TextInputType.number,
+                          controller: _carDate,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              CustomButton(
+                                title: "Cancel",
+                                onPress: () {
+                                  Navigator.pop(context);
+                                },
+                                icon: Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                ),
                               ),
-                            ),
-                            CustomButton(
-                              title: isLoading ? "Adding" : "Add Car",
-                              onPress: isLoading
-                                  ? null
-                                  : () {
-                                      addCar();
-                                    },
-                              icon: isLoading
-                                  ? CupertinoActivityIndicator(radius: 10)
-                                  : Icon(
-                                      Icons.done,
-                                      color: Colors.white,
-                                    ),
-                              iconLeft: false,
-                            ),
-                          ],
+                              CustomButton(
+                                title: isLoading ? "Adding" : "Add Car",
+                                onPress:  () {
+                                        addCar();
+                                      },
+                                icon: Icon(
+                                        Icons.done,
+                                        color: Colors.white,
+                                      ),
+                                iconLeft: false,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

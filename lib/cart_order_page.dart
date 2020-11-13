@@ -308,7 +308,7 @@ class _OrderNowPageState extends State<OrderNowPage>
       ..acceptAchPayments = false
       ..acceptGHMobileMoneyPayments = false
       ..acceptUgMobileMoneyPayments = false
-      ..staging = true
+      ..staging = false
       ..isPreAuth = true
       ..displayFee = true;
 

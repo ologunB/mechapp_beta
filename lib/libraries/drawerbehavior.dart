@@ -334,7 +334,8 @@ class MenuController extends ChangeNotifier {
 
   MenuController({
     this.vsync,
-  }) : _animationController = new AnimationController(vsync: vsync) {
+  }) : _animationController = new AnimationController( vsync: vsync
+  ) {
     _animationController
       ..duration = const Duration(milliseconds: 250)
       ..addListener(() {
@@ -510,7 +511,7 @@ class _MenuViewState extends State<MenuView> with TickerProviderStateMixin {
     super.initState();
     titleAnimationController = new AnimationController(
       duration: const Duration(milliseconds: 250),
-      vsync: this,
+     vsync: this,
     );
   }
 

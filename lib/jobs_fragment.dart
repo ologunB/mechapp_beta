@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:mechapp/mechanic/mech_jobs_fragment.dart';
 import 'package:mechapp/utils/type_constants.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 
@@ -19,6 +21,7 @@ class JobModel {
       otherPersonUID,
       hasReviewed,
       carType;
+
   JobModel(
       {this.otherPersonName,
       this.phoneNumber,
@@ -95,10 +98,12 @@ class _MyJobsFState extends State<MyJobsF> {
                 : Container(
                     color: Color(0xb090A1AE),
                     height: double.infinity,
-                    child: GridView.builder(
+                    child: StaggeredGridView.count(
                       shrinkWrap: true,
-                      itemCount: list.length,
-                      itemBuilder: (context, index) {
+                      crossAxisCount: 4,
+                      // I only need two card horizontally
+                      children: list.map<Widget>((item) {
+                        //Do you need to go somewhere when you tap on this card, wrap using InkWell and add your route
                         return Center(
                           child: Card(
                             child: Padding(
@@ -108,7 +113,7 @@ class _MyJobsFState extends State<MyJobsF> {
                                   Padding(
                                     padding: const EdgeInsets.all(4.0),
                                     child: CachedNetworkImage(
-                                      imageUrl: list[index].image,
+                                      imageUrl: item.image,
                                       height: 70,
                                       width: 70,
                                       placeholder: (context, url) =>
@@ -129,13 +134,13 @@ class _MyJobsFState extends State<MyJobsF> {
                                     ),
                                   ),
                                   Text(
-                                    list[index].otherPersonName,
+                                    item.otherPersonName,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontSize: 22, color: Colors.deepPurple),
                                   ),
                                   Text(
-                                    list[index].phoneNumber,
+                                    item.phoneNumber,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontSize: 22,
@@ -143,7 +148,7 @@ class _MyJobsFState extends State<MyJobsF> {
                                         fontWeight: FontWeight.w900),
                                   ),
                                   Text(
-                                    "₦" + list[index].amount,
+                                    "₦" + item.amount,
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontSize: 22,
@@ -152,21 +157,24 @@ class _MyJobsFState extends State<MyJobsF> {
                                   ),
                                   Center(
                                     child: Text(
-                                      list[index].time,
+                                      item.time,
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                           fontSize: 22, color: Colors.black),
                                     ),
                                   ),
-                                  ConfirmButton(index: index),
+                                  ConfirmButton(index: item),
                                 ],
                               ),
                             ),
                           ),
                         );
-                      },
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2, childAspectRatio: 0.7),
+                      }).toList(),
+                      staggeredTiles: list
+                          .map<StaggeredTile>((_) => StaggeredTile.fit(2))
+                          .toList(),
+                      mainAxisSpacing: 3.0,
+                      crossAxisSpacing: 4.0,
                     ),
                   );
           }
@@ -187,8 +195,10 @@ class _MyJobsFState extends State<MyJobsF> {
 }
 
 class ConfirmButton extends StatefulWidget {
-  final int index;
+  final JobModel index;
+
   ConfirmButton({this.index});
+
   @override
   _ConfirmButtonState createState() => _ConfirmButtonState();
 }
@@ -197,12 +207,12 @@ class _ConfirmButtonState extends State<ConfirmButton> {
   String status = "Confirm Job?";
   Color statusColor = Colors.blue;
 
-  void confirmJob(int index, aSetState, context) async {
-    String otherUID = list[index].otherPersonUID;
-    String transactID = list[index].transactID;
-    String amount = list[index].amount;
-    String carType = list[index].carType;
-    String nameOfMech = list[index].otherPersonName;
+  void confirmJob(JobModel index, aSetState, context) async {
+    String otherUID = index.otherPersonUID;
+    String transactID = index.transactID;
+    String amount = index.amount;
+    String carType = index.carType;
+    String nameOfMech = index.otherPersonName;
 
     String made = "Your payment of ₦" +
         amount +
@@ -233,37 +243,37 @@ class _ConfirmButtonState extends State<ConfirmButton> {
     Map<String, Object> valuesToMech = Map();
     valuesToMech.putIfAbsent("Trans Confirmation", () => "Confirmed");
 
-    final Map<String, Object> valuesToCustomer = Map();
-    valuesToCustomer.putIfAbsent("Trans Confirmation", () => "Confirmed");
-
-    rootRef
-        .child("Jobs Collection")
-        .child("Mechanic")
-        .child(otherUID)
-        .child(transactID)
-        .update(valuesToMech);
-
     rootRef
         .child("Notification Collection")
         .child("Mechanic")
         .child(otherUID)
         .child(transactID)
-        .set(receivedMessage);
+        .set(receivedMessage).then((value){
 
-    rootRef
-        .child("Jobs Collection")
-        .child("Customer")
-        .child(mUID)
-        .child(transactID)
-        .update(valuesToCustomer);
+      rootRef
+          .child("Jobs Collection")
+          .child("Mechanic")
+          .child(otherUID)
+          .child(transactID)
+          .update(valuesToMech);
+    });
+
+
     rootRef
         .child("Notification Collection")
         .child("Customer")
         .child(mUID)
         .push()
-        .set(sentMessage);
+        .set(sentMessage).then((value){
+      rootRef
+          .child("Jobs Collection")
+          .child("Customer")
+          .child(mUID)
+          .child(transactID)
+          .update(valuesToMech);
+    });
     aSetState(() {
-      bool isConfirmed = list[widget.index].mechStatus == "Confirmed";
+      bool isConfirmed = widget.index.mechStatus == "Confirmed";
       status = isConfirmed ? "RATE MECH." : "PENDING!";
       statusColor = isConfirmed ? Colors.teal : Colors.red;
     });
@@ -272,7 +282,7 @@ class _ConfirmButtonState extends State<ConfirmButton> {
   }
 
   void rateMechanic(
-      int index, String reviewMessage, double givenRate, aSetState) async {
+      JobModel index, String reviewMessage, double givenRate, aSetState) async {
     final Map<String, Object> review = Map();
     review.putIfAbsent("review_message", () => reviewMessage);
     review.putIfAbsent("review_time", () => thePresentTime());
@@ -308,7 +318,7 @@ class _ConfirmButtonState extends State<ConfirmButton> {
           .child("Jobs Collection")
           .child("Customer")
           .child(mUID)
-          .child(list[index].transactID)
+          .child(index.transactID)
           .update(cusVal);
       aSetState(() {
         status = "CONFIRMED!";
@@ -326,16 +336,16 @@ class _ConfirmButtonState extends State<ConfirmButton> {
   Widget build(BuildContext context) {
     TextEditingController _messageController = TextEditingController();
     double ratingNum = 3;
-    if (list[widget.index].cusStatus == "Confirmed" &&
-        list[widget.index].mechStatus == "Confirmed") {
-      if (list[widget.index].hasReviewed == "True") {
+    if (widget.index.cusStatus == "Confirmed" &&
+        widget.index.mechStatus == "Confirmed") {
+      if (widget.index.hasReviewed == "True") {
         status = "COMPLETED!";
         statusColor = Colors.black12;
       } else {
         status = "RATE MECH.";
         statusColor = Colors.teal;
       }
-    } else if (list[widget.index].cusStatus == "Confirmed") {
+    } else if (widget.index.cusStatus == "Confirmed") {
       status = "PENDING!";
       statusColor = Colors.red;
     } else {
@@ -347,7 +357,7 @@ class _ConfirmButtonState extends State<ConfirmButton> {
         child: RaisedButton(
           color: statusColor,
           onPressed: () async {
-            selectedUID = list[widget.index].otherPersonUID;
+            selectedUID = widget.index.otherPersonUID;
 
             switch (status) {
               case "Confirm Job?":
@@ -381,7 +391,7 @@ class _ConfirmButtonState extends State<ConfirmButton> {
                     barrierDismissible: true,
                     builder: (_) => CupertinoAlertDialog(
                       title: Text("Rate your dealing with " +
-                          list[widget.index].otherPersonName),
+                          widget.index.otherPersonName),
                       content: Column(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         mainAxisSize: MainAxisSize.min,

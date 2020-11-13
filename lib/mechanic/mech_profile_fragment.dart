@@ -251,14 +251,14 @@ class _MechProfileFragmentState extends State<MechProfileFragment>
                             style: TextStyle(fontSize: 18),
                             readOnly: true,
                           ),
-                          TextField(
+                    /*      TextField(
                             controller: localityC,
                             decoration: InputDecoration(
                                 labelText: "Locality",
                                 labelStyle: TextStyle(color: Colors.blue)),
                             readOnly: true,
                             style: TextStyle(fontSize: 18),
-                          ),
+                          ),*/
                           TextField(
                             controller: companyWebC,
                             decoration: InputDecoration(
@@ -280,8 +280,8 @@ class _MechProfileFragmentState extends State<MechProfileFragment>
                               "Images of previous works/workshop or goods",
                               style: TextStyle(
                                   fontSize: 20,
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.w500),
+                                  color: primaryColor,
+                                  fontWeight: FontWeight.w600),
                               textAlign: TextAlign.center,
                             ),
                           ),
@@ -383,8 +383,8 @@ class _MechProfileFragmentState extends State<MechProfileFragment>
                               "Account Details",
                               style: TextStyle(
                                   fontSize: 20,
-                                  color: Colors.blue,
-                                  fontWeight: FontWeight.w500),
+                                  color: primaryColor,
+                                  fontWeight: FontWeight.w600),
                             ),
                           ),
                           TextField(

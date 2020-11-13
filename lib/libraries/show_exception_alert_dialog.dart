@@ -44,4 +44,7 @@ Map<String, String> _errors = {
       'We have blocked all requests from this device due to unusual activity. Try again later.',
   'ERROR_OPERATION_NOT_ALLOWED':
       'This sign in method is not allowed. Please contact support.',
+
+  'ERROR_OPERATION_NOT_ALLOWED':
+  'This sign in method is not allowed. Please contact support.',
 };

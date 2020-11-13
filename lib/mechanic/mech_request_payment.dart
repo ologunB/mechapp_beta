@@ -14,7 +14,7 @@ class MechRequestPayment extends StatefulWidget {
 }
 
 class _MechRequestPaymentState extends State<MechRequestPayment> {
-  Stream<String> getJobs() async* {
+  Future<String> getJobs() async {
     DatabaseReference dataRef = FirebaseDatabase.instance
         .reference()
         .child("All Jobs Collection")
@@ -28,15 +28,15 @@ class _MechRequestPaymentState extends State<MechRequestPayment> {
         t7 = dATA['Payment Request'];
       });
     });
-    yield "the";
+    return "the";
   }
 
   final _formKey = GlobalKey<FormState>();
 
   Widget _buildFutureBuilder() {
     return Center(
-      child: StreamBuilder<String>(
-        stream: getJobs(),
+      child: FutureBuilder<String>(
+        future: getJobs(),
         builder: (context, snapshots) {
           if (snapshots.connectionState == ConnectionState.done) {
             return Text("evefgvegve");

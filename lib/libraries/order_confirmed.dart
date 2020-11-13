@@ -6,6 +6,7 @@ class OrderConfirmedDone extends StatefulWidget {
   final String from;
 
   const OrderConfirmedDone({Key key, this.from}) : super(key: key);
+
   @override
   _OrderConfirmedDoneState createState() => _OrderConfirmedDoneState();
 }
@@ -54,6 +55,20 @@ class _OrderConfirmedDoneState extends State<OrderConfirmedDone> {
                     color: Colors.black,
                     fontWeight: FontWeight.w800,
                     fontSize: 28),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: FlatButton(
+                    onPressed: () {
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          CupertinoPageRoute(builder: (context) => CusMainPage()),
+                          (Route<dynamic> route) => false);
+                    },
+                    child: Text(
+                      "CLOSE",
+                      style: TextStyle(color: Colors.red, fontSize: 20),
+                    )),
               ),
               SizedBox(height: 30),
             ],

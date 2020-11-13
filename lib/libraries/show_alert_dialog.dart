@@ -15,16 +15,16 @@ Future<bool> showAlertDialog({
   return await showCupertinoDialog(
     context: context,
     builder: (context) => CupertinoAlertDialog(
-      title: Text(title),
-      content: Text(content),
+      title: Text(title, style: TextStyle(fontSize: 18),),
+      content: Text(content, style: TextStyle(fontSize: 17),),
       actions: <Widget>[
         if (cancelActionText != null)
           CupertinoDialogAction(
-            child: Text(cancelActionText),
+            child: Text(cancelActionText, style: TextStyle(fontSize: 17),),
             onPressed: () => Navigator.of(context).pop(false),
           ),
         CupertinoDialogAction(
-          child: Text(defaultActionText),
+          child: Text(defaultActionText, style: TextStyle(fontSize: 17),),
           onPressed: () => Navigator.of(context).pop(true),
         ),
       ],

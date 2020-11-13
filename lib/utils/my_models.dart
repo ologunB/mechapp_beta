@@ -19,6 +19,7 @@ class Car {
   String get regNo => _regNo;
 
   String get id => _id;
+
   String get img => _img;
 
   Car.fromSnapshot(DataSnapshot snapshot) {
@@ -74,19 +75,6 @@ class EachMechanic {
       this.streetName});
 }
 
-class EachJob {
-  String id;
-  String _jobsDone;
-
-  EachJob(this._jobsDone);
-
-  String get jobsDone => _jobsDone;
-
-  EachJob.fromSnapshot(DataSnapshot snapshot) {
-    _jobsDone = snapshot.key;
-  }
-}
-
 class ShopItem {
   String name, price, soldBy, desc, email, number, itemID, type;
   List images;
@@ -102,3 +90,31 @@ class ShopItem {
       this.itemID,
       type});
 }
+
+/*
+class JobModel {
+  String otherPersonName,
+      phoneNumber,
+      amount,
+      time,
+      image,
+      cusStatus,
+      mechStatus,
+      transactID,
+      otherPersonUID,
+      hasReviewed, serverCon,
+      carType;
+
+  JobModel(
+      {this.otherPersonName,
+        this.phoneNumber,
+        this.amount,
+        this.time,
+        this.image,
+        this.cusStatus,
+        this.hasReviewed,
+        this.mechStatus,
+        this.otherPersonUID,
+        this.transactID, this.serverCon,
+        this.carType});
+}*/

@@ -11,7 +11,9 @@ import 'main_cart.dart';
 
 class EachProduct extends StatefulWidget {
   final ShopItem shopItem;
+
   EachProduct({Key key, @required this.shopItem}) : super(key: key);
+
   @override
   _EachProductState createState() => _EachProductState();
 }
@@ -93,28 +95,23 @@ class _EachProductState extends State<EachProduct> {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      "Description: ",
-                      textAlign: TextAlign.center,
+                child: RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                      text: "Description:\n",
                       style: TextStyle(
                           fontSize: 18,
                           color: Colors.red,
                           fontWeight: FontWeight.w700),
-                    ),
-                    Flexible(
-                      child: Text(
-                        widget.shopItem.desc,
-                        style: TextStyle(
-                            fontSize: 18,
-                            color: primaryColor,
-                            fontWeight: FontWeight.w700),
-                      ),
-                    ),
-                  ],
+                      children: <TextSpan>[
+                        TextSpan(
+                          text: widget.shopItem.desc,
+                          style: TextStyle(
+                              fontSize: 18,
+                              color: primaryColor,
+                              fontWeight: FontWeight.w700),
+                        )
+                      ]),
                 ),
               ),
               Padding(
@@ -203,7 +200,7 @@ class _EachProductState extends State<EachProduct> {
                             CupertinoPageRoute(
                               fullscreenDialog: true,
                               builder: (context) {
-                                return MainCart();
+                                return MainCart(main: 'product');
                               },
                             ),
                           );

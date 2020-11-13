@@ -51,7 +51,7 @@ class _CustomButtonState extends State<CustomButton> {
                   widget.title,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                      fontSize: 20,
+                      fontSize: 17,
                       fontWeight: FontWeight.w900,
                       color: Colors.white),
                 ),
