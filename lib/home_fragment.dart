@@ -392,7 +392,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                                 context,
                                 CupertinoPageRoute(
                                   builder: (context) => ViewMechProfile(
-                                    mechanic: mechList[index],
+                                    mechanic: sortedList[index],
                                   ),
                                 ),
                               );
@@ -503,7 +503,7 @@ List<ServiceType> httpServicesList = [
   ServiceType(
       typeTitle: "Accidented Vehicle",
       typeImageUrl:
-          "https://firebasestorage.googleapis.com/v0/b/mechanics-b3612.appspot.com/o/service%20images%2Faccidentedve.png?alt=media&token=76e63037-0d2a-4678-b627-42017698238e"),
+          "https://firebasestorage.googleapis.com/v0/b/mechanics-b3612.appspot.com/o/images%2Ficons8-crashed-car-48.png?alt=media&token=166baa0b-269d-4d90-8391-2b3146ffabb0"),
   ServiceType(
       typeTitle: "Air Conditioner",
       typeImageUrl:
@@ -511,11 +511,11 @@ List<ServiceType> httpServicesList = [
   ServiceType(
       typeTitle: "Brake System",
       typeImageUrl:
-          "https://firebasestorage.googleapis.com/v0/b/mechanics-b3612.appspot.com/o/service%20images%2Fbrakesystem.png?alt=media&token=0c40ecb2-be53-4810-b2e1-9c6ad9052baf"),
+          "https://firebasestorage.googleapis.com/v0/b/mechanics-b3612.appspot.com/o/images%2Ficons8-brake-discs-64.png?alt=media&token=11f5b66e-06bc-42a3-bd29-8162420d0c30"),
   ServiceType(
       typeTitle: "Brake pad replacement",
       typeImageUrl:
-          "https://firebasestorage.googleapis.com/v0/b/mechanics-b3612.appspot.com/o/service%20images%2Fbrakepad.png?alt=media&token=efefb1c3-e589-4d42-8c45-1b067f422632"),
+          "https://firebasestorage.googleapis.com/v0/b/mechanics-b3612.appspot.com/o/images%2Ficons8-brake-pedal-48.png?alt=media&token=f6afaea3-279c-4310-95ec-db0c684b557e"),
   ServiceType(
       typeTitle: "Call Us",
       typeImageUrl:
@@ -523,7 +523,7 @@ List<ServiceType> httpServicesList = [
   ServiceType(
       typeTitle: "Car Scan",
       typeImageUrl:
-          "https://firebasestorage.googleapis.com/v0/b/mechanics-b3612.appspot.com/o/service%20images%2Fcarscan.png?alt=media&token=4515fc81-20e6-4fd2-ace8-3f98c55ba224"),
+          "https://firebasestorage.googleapis.com/v0/b/mechanics-b3612.appspot.com/o/images%2Ficons8-barcode-reader-100.png?alt=media&token=fdf865bc-adc2-45bd-8fce-11848481c390"),
   ServiceType(
       typeTitle: "Car Tint",
       typeImageUrl:
@@ -543,7 +543,7 @@ List<ServiceType> httpServicesList = [
   ServiceType(
       typeTitle: "Locking & Keys/Security",
       typeImageUrl:
-          "https://firebasestorage.googleapis.com/v0/b/mechanics-b3612.appspot.com/o/service%20images%2Flockingkey.png?alt=media&token=e833e814-2029-4058-8164-aa5144c0045c"),
+          "https://firebasestorage.googleapis.com/v0/b/mechanics-b3612.appspot.com/o/images%2Ficons8-car-rental-64.png?alt=media&token=38b1d7b6-6861-41f8-a112-d68998100702"),
   ServiceType(
       typeTitle: "Oil & Filter Change",
       typeImageUrl:
@@ -555,15 +555,15 @@ List<ServiceType> httpServicesList = [
   ServiceType(
       typeTitle: "Panel Beater",
       typeImageUrl:
-          "https://firebasestorage.googleapis.com/v0/b/mechanics-b3612.appspot.com/o/service%20images%2Fpanelbeater.png?alt=media&token=74a19b1d-58f7-4caa-b084-8bbca954bee8"),
+          "https://firebasestorage.googleapis.com/v0/b/mechanics-b3612.appspot.com/o/images%2Ficons8-manual-metal-arc-welding-50.png?alt=media&token=588f9d82-81ed-486c-a63b-110aa636b84c"),
   ServiceType(
       typeTitle: "Tow trucks",
       typeImageUrl:
-          "https://firebasestorage.googleapis.com/v0/b/mechanics-b3612.appspot.com/o/service%20images%2Ftowserv.png?alt=media&token=143b603a-c356-4b1b-95ce-162be46fa506"),
+          "https://firebasestorage.googleapis.com/v0/b/mechanics-b3612.appspot.com/o/images%2Ficons8-tow-truck-64.png?alt=media&token=bfdc0928-f089-445d-b9dd-f550125f57f6"),
   ServiceType(
       typeTitle: "Upholstery & Interior",
       typeImageUrl:
-          "https://firebasestorage.googleapis.com/v0/b/mechanics-b3612.appspot.com/o/service%20images%2Finterior.png?alt=media&token=1e8c9998-b419-4209-b8a7-6f4f8597a97e"),
+          "https://firebasestorage.googleapis.com/v0/b/mechanics-b3612.appspot.com/o/images%2Ficons8-wing-chair-48.png?alt=media&token=ba5247a5-fb6b-4a06-81a0-ffefe6e78164"),
   ServiceType(
       typeTitle: "Wheel Balancing & Alignment",
       typeImageUrl:

@@ -23,6 +23,7 @@ class _ListViewNoteState extends State<MyGarage>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
+
   List<Car> cars;
   StreamSubscription<Event> _onCarAddedSubscription;
 

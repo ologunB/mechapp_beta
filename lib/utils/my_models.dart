@@ -118,3 +118,30 @@ class JobModel {
         this.transactID, this.serverCon,
         this.carType});
 }*/
+
+class EachTrx {
+  String _uid, _id;
+  String _date;
+  String _amount;
+
+  EachTrx(this._amount, this._uid, this._date, this._id);
+
+  String get amount => _amount;
+
+  String get uid => _uid;
+
+  String get date => _date;
+
+  EachTrx.fromSnapshot(DataSnapshot snapshot) {
+    _id = snapshot.key;
+    _amount = snapshot.value['amount'];
+    _uid = snapshot.value['uid'];
+    _date = snapshot.value['date'];
+  }
+
+  EachTrx.map(dynamic obj) {
+    this._amount = obj['amount'];
+    this._uid = obj['uid'];
+    this._date = obj['date'];
+  }
+}

@@ -258,6 +258,7 @@ class _ConfirmButtonState extends State<ConfirmButton> {
           .update(valuesToMech);
     });
 
+    sendSendNotification(received, otherUID);
 
     rootRef
         .child("Notification Collection")
@@ -324,6 +325,11 @@ class _ConfirmButtonState extends State<ConfirmButton> {
         status = "CONFIRMED!";
         statusColor = Colors.black12;
       });
+
+      String toUID = widget.index.otherPersonUID;
+      String message = "You were rated $givenRate Stars";
+
+      sendSendNotification(message, toUID);
 
       Navigator.pop(context);
       showToast("Review Submitted", context);
@@ -502,7 +508,7 @@ class _ConfirmButtonState extends State<ConfirmButton> {
               status,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.w900,
                   color: Colors.black),
             ),

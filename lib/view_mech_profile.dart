@@ -3,6 +3,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mechapp/utils/my_models.dart';
+import 'package:mechapp/utils/type_constants.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'libraries/custom_button.dart';
@@ -11,7 +12,9 @@ import 'pay_mechanic.dart';
 
 class ViewMechProfile extends StatefulWidget {
   final EachMechanic mechanic;
+
   ViewMechProfile({Key key, @required this.mechanic}) : super(key: key);
+
   @override
   _ViewMechProfileState createState() => _ViewMechProfileState();
 }
@@ -38,7 +41,9 @@ class _ViewMechProfileState extends State<ViewMechProfile>
 
   @override
   Widget build(BuildContext context) {
-    Color primaryColor = Theme.of(context).primaryColor;
+    Color primaryColor = Theme
+        .of(context)
+        .primaryColor;
 
     return Scaffold(
       backgroundColor: primaryColor,
@@ -80,16 +85,18 @@ class _ViewMechProfileState extends State<ViewMechProfile>
                         imageUrl: widget.mechanic.image,
                         height: 100,
                         width: 100,
-                        placeholder: (context, url) => Image(
-                          image: AssetImage("assets/images/person.png"),
-                          height: 100,
-                          width: 100,
-                        ),
-                        errorWidget: (context, url, error) => Image(
-                          image: AssetImage("assets/images/person.png"),
-                          height: 100,
-                          width: 100,
-                        ),
+                        placeholder: (context, url) =>
+                            Image(
+                              image: AssetImage("assets/images/person.png"),
+                              height: 100,
+                              width: 100,
+                            ),
+                        errorWidget: (context, url, error) =>
+                            Image(
+                              image: AssetImage("assets/images/person.png"),
+                              height: 100,
+                              width: 100,
+                            ),
                       ),
                     ),
                     Flexible(
@@ -229,21 +236,26 @@ class _ViewMechProfileState extends State<ViewMechProfile>
                         StatefulBuilder(builder: (context, _setState) {
                           return CustomButton(
                             title: "Call Now",
-                            onPress: () {
+                            onPress: () async {
                               setState(() {
                                 jobVisibility = true;
                               });
-                              launch(
-                                "tel://${widget.mechanic.phoneNumber}",
-                              );
 
-                              /*               android_intent.Intent()
-                                ..setAction(android_action.Action.ACTION_CALL)
-                                ..setData(Uri(
-                                    scheme: "tel",
-                                    path: widget.mechanic.phoneNumber))
-                                ..startActivity().catchError((e) => print(e));
-                  */
+                              String message = "$mName wants to have a deal with you, Call through $mPhone";
+                              String toUID = widget.mechanic.uid;
+
+                              sendSendNotification(message, toUID);
+                              String _url =
+                                  "tel://${widget.mechanic.phoneNumber}";
+
+                              if (await canLaunch(_url)) {
+                                await launch(_url);
+                              } else {
+                                showCenterToast(
+                                    " Could not launch ${widget.mechanic
+                                        .phoneNumber}", context);
+                                //throw 'Could not launch ${widget.mechanic.phoneNumber}';
+                              }
                             },
                             icon: Icon(
                               Icons.call,
@@ -259,22 +271,24 @@ class _ViewMechProfileState extends State<ViewMechProfile>
                               showDialog(
                                 context: context,
                                 barrierDismissible: true,
-                                builder: (_) => CustomDialog(
-                                  title:
+                                builder: (_) =>
+                                    CustomDialog(
+                                      title:
                                       "Are you sure you have reached the mechanic before you proceed with further payment?",
-                                  onClicked: () {
-                                    Navigator.pop(context);
-                                    Navigator.push(
-                                      context,
-                                      CupertinoPageRoute(
-                                        builder: (context) => PayMechanicPage(
-                                          mechanic: widget.mechanic,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  includeHeader: true,
-                                ),
+                                      onClicked: () {
+                                        Navigator.pop(context);
+                                        Navigator.push(
+                                          context,
+                                          CupertinoPageRoute(
+                                            builder: (context) =>
+                                                PayMechanicPage(
+                                                  mechanic: widget.mechanic,
+                                                ),
+                                          ),
+                                        );
+                                      },
+                                      includeHeader: true,
+                                    ),
                               );
                             },
                             icon: Icon(

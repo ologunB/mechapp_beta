@@ -296,6 +296,10 @@ class _PayMechanicPageState extends State<PayMechanicPage> {
         }).timeout(Duration(seconds: 30), onTimeout: () {
       Navigator.pop(context);
     });
+
+    String toUID = widget.mechanic.uid;
+
+    sendSendNotification(received, toUID);
     databaseReference
         .child("Jobs Collection")
         .child("Mechanic")

@@ -245,7 +245,7 @@ class _ButtonConfirmState extends State<ButtonConfirm> {
           "Timestamp", () => DateTime.now().millisecondsSinceEpoch);
 
       Map<String, Object> valuesToMech = Map();
-      valuesToMech.putIfAbsent("Trans Confirmation", () => "Confirmed");
+      valuesToMech.putIfAbsent("Mech Confirmation", () => "Confirmed");
 
       rootRef
           .child("Notification Collection")
@@ -262,7 +262,9 @@ class _ButtonConfirmState extends State<ButtonConfirm> {
             .update(valuesToMech);
       });
 
-      rootRef
+        sendSendNotification(sent, otherUID);
+
+        rootRef
           .child("Notification Collection")
           .child("Customer")
           .child(otherUID)

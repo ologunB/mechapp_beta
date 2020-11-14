@@ -30,19 +30,19 @@ class _MechHomeFragmentState extends State<MechHomeFragment>
         .child("All Jobs Collection")
         .child(mUID);
 
-    await dataRef.once().then((snapshot) {
+    await dataRef.once().then((snapshot) async {
       var dATA = snapshot.value;
 
-      setState(() async {
-        t1 = dATA['Total Job'];
-        t2 = dATA['Total Amount'];
-        t3 = dATA['Pending Job'];
-        t4 = dATA['Pending Amount'];
-        t5 = dATA['Cash Payment Debt'];
-        t6 = dATA['Pay pending Amount'];
-        t7 = dATA['Payment Request'];
-        t8 = dATA['Completed Amount'];
-      });
+      t1 = dATA['Total Job'];
+      t2 = dATA['Total Amount'];
+      t3 = dATA['Pending Job'];
+      t4 = dATA['Pending Amount'];
+      t5 = dATA['Cash Payment Debt'];
+      t6 = dATA['Pay pending Amount'];
+      t7 = dATA['Payment Request'];
+      t8 = dATA['Completed Amount'];
+
+      setState(() async {});
     });
 
     List<String> list = [];
@@ -151,19 +151,31 @@ Widget _eachItem1(
             ),
             Text(
               "Jobs",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400, color: Colors.deepPurple),
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.deepPurple),
             ),
             Text(
               noJobs,
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600, color: Colors.blue),
+              style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.blue),
             ),
             Text(
               "Amount",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400, color: Colors.deepPurple),
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.deepPurple),
             ),
             Text(
               "₦" + " $amount",
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600, color: Colors.blue),
+              style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.blue),
             ),
           ],
         ),
@@ -201,11 +213,17 @@ Widget _eachItem2(String type1, String amount1, String type2, String amount2,
             ),
             Text(
               "Amount",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400, color: Colors.deepPurple),
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.deepPurple),
             ),
             Text(
               "₦" + " $amount1",
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600, color: Colors.blue),
+              style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.blue),
             ),
             Center(
               child: Text(
@@ -222,11 +240,17 @@ Widget _eachItem2(String type1, String amount1, String type2, String amount2,
             ),
             Text(
               "Amount",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.w400, color: Colors.deepPurple),
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.deepPurple),
             ),
             Text(
               "₦" + " $amount2",
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.w600, color: Colors.blue),
+              style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.blue),
             ),
           ],
         ),

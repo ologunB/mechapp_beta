@@ -6,11 +6,12 @@ import 'package:mechapp/contact_us_fragment.dart';
 import 'package:mechapp/help_fragment.dart';
 import 'package:mechapp/libraries/custom_dialog.dart';
 import 'package:mechapp/log_in.dart';
-import 'package:mechapp/mechanic/mech_make_payment.dart';
+import 'package:mechapp/mechanic/mech_wallet_payment.dart';
 import 'package:mechapp/mechanic/mech_profile_fragment.dart';
 import 'package:mechapp/mechanic/mech_request_payment.dart';
 import 'package:mechapp/notifications_fragment.dart';
 import 'package:mechapp/utils/type_constants.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../libraries/drawerbehavior.dart';
@@ -41,15 +42,15 @@ class _MechMainPageState extends State<MechMainPage> {
         icon: Icons.group_work,
       ),
       MenuItem(
-        id: 'Make Payment',
-        title: 'Make Payment',
+        id: 'Wallet',
+        title: 'Wallet',
         icon: Icons.payment,
       ),
-      MenuItem(
+/*      MenuItem(
         id: 'Request Payment',
         title: 'Request Payment',
         icon: Icons.assignment_return,
-      ),
+      ),*/
       MenuItem(
         id: 'Help',
         title: 'Help',
@@ -70,8 +71,8 @@ class _MechMainPageState extends State<MechMainPage> {
     MechHomeFragment(),
     MechProfileFragment(),
     MechJobsF(),
-    MechMakePayment(),
-    MechRequestPayment(),
+    MechWallet(),
+   // MechRequestPayment(),
     HelpF(),
     ContactUsF()
   ];
@@ -129,6 +130,7 @@ class _MechMainPageState extends State<MechMainPage> {
     mEmail = await email;
     mPhone = await phone;
     mUID = await uid;
+    initPlatformState();
   }
 
   @override
@@ -250,6 +252,7 @@ class _MechMainPageState extends State<MechMainPage> {
                         title: "Are you sure you want to log out?",
                         onClicked: () {
                           Navigator.pop(context);
+                          _handleRemoveExternalUserId();
                           Navigator.of(context).pushReplacement(
                             CupertinoPageRoute(
                               fullscreenDialog: true,
@@ -393,22 +396,17 @@ class _MechMainPageState extends State<MechMainPage> {
             } else if (itemId == "Help") {
               setState(() {
                 title = selectedMenuItemId;
-                currentWidget = pages[5];
+                currentWidget = pages[4];
               });
-            } else if (itemId == "Make Payment") {
+            } else if (itemId == "Wallet") {
               setState(() {
                 title = selectedMenuItemId;
                 currentWidget = pages[3];
               });
-            } else if (itemId == "Request Payment") {
-              setState(() {
-                title = selectedMenuItemId;
-                currentWidget = pages[4];
-              });
             } else if (itemId == "Contact Us") {
               setState(() {
                 title = selectedMenuItemId;
-                currentWidget = pages[6];
+                currentWidget = pages[5];
               });
             }
           },
@@ -419,5 +417,87 @@ class _MechMainPageState extends State<MechMainPage> {
         ),
       ),
     );
+  }
+
+  String _debugLabelString = "";
+
+  bool _requireConsent = true;
+
+  Future<void> initPlatformState() async {
+    if (!mounted) return;
+
+    OneSignal.shared.setLogLevel(OSLogLevel.verbose, OSLogLevel.none);
+
+    OneSignal.shared.setRequiresUserPrivacyConsent(_requireConsent);
+
+    var settings = {
+      OSiOSSettings.autoPrompt: true,
+      OSiOSSettings.promptBeforeOpeningPushUrl: true
+    };
+
+    OneSignal.shared
+        .setNotificationReceivedHandler((OSNotification notification) {
+      setState(() {
+        _debugLabelString =
+            "Received notification: \n${notification.jsonRepresentation().replaceAll("\\n", "\n")}";
+      });
+      setState(() {});
+    });
+
+    OneSignal.shared
+        .setNotificationOpenedHandler((OSNotificationOpenedResult result) {});
+
+    OneSignal.shared
+        .setInAppMessageClickedHandler((OSInAppMessageAction action) {
+      this.setState(() {
+        _debugLabelString =
+            "In App Message Clicked: \n${action.jsonRepresentation().replaceAll("\\n", "\n")}";
+      });
+    });
+
+    OneSignal.shared
+        .setSubscriptionObserver((OSSubscriptionStateChanges changes) {
+      print("SUBSCRIPTION STATE CHANGED: ${changes.jsonRepresentation()}");
+    });
+
+    OneSignal.shared.setPermissionObserver((OSPermissionStateChanges changes) {
+      print("PERMISSION STATE CHANGED: ${changes.jsonRepresentation()}");
+    });
+
+    OneSignal.shared.setEmailSubscriptionObserver(
+        (OSEmailSubscriptionStateChanges changes) {
+      print("EMAIL SUBSCRIPTION STATE CHANGED ${changes.jsonRepresentation()}");
+    });
+
+    await OneSignal.shared.init(oneOnlineSignalKey, iOSSettings: settings);
+
+    OneSignal.shared
+        .setInFocusDisplayType(OSNotificationDisplayType.notification);
+
+    OneSignal.shared.consentGranted(true);
+    OneSignal.shared.setLocationShared(true);
+    _handleSetExternalUserId();
+  }
+
+  void _handleSetExternalUserId() {
+    print("Setting external user ID");
+    String _externalUserId = mUID;
+    OneSignal.shared.setExternalUserId(_externalUserId).then((results) {
+      if (results == null) return;
+
+      this.setState(() {
+        _debugLabelString = "External user id set: $results";
+      });
+    });
+  }
+
+  void _handleRemoveExternalUserId() {
+    OneSignal.shared.removeExternalUserId().then((results) {
+      if (results == null) return;
+
+      this.setState(() {
+        _debugLabelString = "External user id removed: $results";
+      });
+    });
   }
 }

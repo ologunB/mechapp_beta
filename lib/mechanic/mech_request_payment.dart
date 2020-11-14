@@ -71,6 +71,7 @@ class _MechRequestPaymentState extends State<MechRequestPayment> {
         .child("Payment Request")
         .child("Pending")
         .child(mUID)
+        .child(randomString())
         .set(pRequest)
         .then((a) {
       rootRef
