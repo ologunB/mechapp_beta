@@ -486,24 +486,24 @@ class _MechProfileFragmentState extends State<MechProfileFragment>
                                           m.putIfAbsent("Specifications",
                                               () => specTempList);
 
-                                          Firestore.instance
+                                          FirebaseFirestore.instance
                                               .collection("Mechanics")
-                                              .document(mUID)
-                                              .updateData(m);
-                                          Firestore.instance
+                                              .doc(mUID)
+                                              .update(m);
+                                          FirebaseFirestore.instance
                                               .collection("All")
-                                              .document(mUID)
-                                              .updateData(m);
+                                              .doc(mUID)
+                                              .update(m);
 
                                           if (_mainPicture != null) {
-                                            StorageReference reference =
+                                            Reference reference =
                                                 _storageRef.child(
                                                     "images/${randomString()}");
 
-                                            StorageUploadTask uploadTask =
+                                           UploadTask uploadTask =
                                                 reference.putFile(_mainPicture);
-                                            StorageTaskSnapshot downloadUrl =
-                                                (await uploadTask.onComplete);
+                                             TaskSnapshot downloadUrl =
+                                                (await uploadTask.whenComplete(() => null));
                                             String url = (await downloadUrl.ref
                                                 .getDownloadURL());
 
@@ -512,29 +512,29 @@ class _MechProfileFragmentState extends State<MechProfileFragment>
                                               isUpdating = false;
                                             });
 
-                                            Firestore.instance
+                                            FirebaseFirestore.instance
                                                 .collection("All")
-                                                .document(mUID)
-                                                .updateData({"Image Url": url});
+                                                .doc(mUID)
+                                                .update({"Image Url": url});
                                           }
                                           if (_previous1 != null) {
-                                            StorageReference reference =
+                                             Reference reference =
                                                 _storageRef.child(
                                                     "images/${randomString()}");
 
-                                            StorageUploadTask uploadTask =
+                                          UploadTask uploadTask =
                                                 reference.putFile(_previous1);
-                                            StorageTaskSnapshot downloadUrl =
-                                                (await uploadTask.onComplete);
+                                            TaskSnapshot downloadUrl =
+                                                (await uploadTask.whenComplete(() => null));
                                             String url = (await downloadUrl.ref
                                                 .getDownloadURL());
 
                                             rootRef.update(
                                                 {"PreviousImage1 Url": url});
-                                            Firestore.instance
+                                             FirebaseFirestore.instance
                                                 .collection("All")
-                                                .document(mUID)
-                                                .updateData({
+                                                .doc(mUID)
+                                                .update({
                                               "PreviousImage1 Url": url
                                             });
 
@@ -543,23 +543,23 @@ class _MechProfileFragmentState extends State<MechProfileFragment>
                                             });
                                           }
                                           if (_previous2 != null) {
-                                            StorageReference reference =
+                                            Reference reference =
                                                 _storageRef.child(
                                                     "images/${randomString()}");
 
-                                            StorageUploadTask uploadTask =
+                                        UploadTask uploadTask =
                                                 reference.putFile(_previous2);
-                                            StorageTaskSnapshot downloadUrl =
-                                                (await uploadTask.onComplete);
+                                            TaskSnapshot downloadUrl =
+                                                (await uploadTask.whenComplete(() => null));
                                             String url = (await downloadUrl.ref
                                                 .getDownloadURL());
 
                                             rootRef.update(
                                                 {"PreviousImage2 Url": url});
-                                            Firestore.instance
+                                            FirebaseFirestore.instance
                                                 .collection("All")
-                                                .document(mUID)
-                                                .updateData({
+                                                .doc(mUID)
+                                                .update({
                                               "PreviousImage2 Url": url
                                             });
 

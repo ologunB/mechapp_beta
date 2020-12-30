@@ -3,7 +3,6 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:mechapp/mechanic/mech_jobs_fragment.dart';
 import 'package:mechapp/utils/type_constants.dart';
 import 'package:smooth_star_rating/smooth_star_rating.dart';
 
@@ -113,7 +112,7 @@ class _MyJobsFState extends State<MyJobsF> {
                                   Padding(
                                     padding: const EdgeInsets.all(4.0),
                                     child: CachedNetworkImage(
-                                      imageUrl: item.image,
+                                      imageUrl: item.image ?? "k",
                                       height: 70,
                                       width: 70,
                                       placeholder: (context, url) =>
@@ -134,13 +133,13 @@ class _MyJobsFState extends State<MyJobsF> {
                                     ),
                                   ),
                                   Text(
-                                    item.otherPersonName,
+                                    item.otherPersonName ?? "k",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontSize: 22, color: Colors.deepPurple),
                                   ),
                                   Text(
-                                    item.phoneNumber,
+                                    item.phoneNumber ?? "k",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontSize: 22,
@@ -148,7 +147,7 @@ class _MyJobsFState extends State<MyJobsF> {
                                         fontWeight: FontWeight.w900),
                                   ),
                                   Text(
-                                    "₦" + item.amount,
+                                    "₦" + item.amount ?? "k",
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                         fontSize: 22,
@@ -157,7 +156,7 @@ class _MyJobsFState extends State<MyJobsF> {
                                   ),
                                   Center(
                                     child: Text(
-                                      item.time,
+                                      item.time ?? "k",
                                       textAlign: TextAlign.center,
                                       style: TextStyle(
                                           fontSize: 22, color: Colors.black),
@@ -248,8 +247,8 @@ class _ConfirmButtonState extends State<ConfirmButton> {
         .child("Mechanic")
         .child(otherUID)
         .child(transactID)
-        .set(receivedMessage).then((value){
-
+        .set(receivedMessage)
+        .then((value) {
       rootRef
           .child("Jobs Collection")
           .child("Mechanic")
@@ -265,7 +264,8 @@ class _ConfirmButtonState extends State<ConfirmButton> {
         .child("Customer")
         .child(mUID)
         .push()
-        .set(sentMessage).then((value){
+        .set(sentMessage)
+        .then((value) {
       rootRef
           .child("Jobs Collection")
           .child("Customer")

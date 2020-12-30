@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -51,119 +50,118 @@ class _MechWalletState extends State<MechWallet> {
               height: double.infinity,
               color: Color(0xb090A1AE),
               child: Column(children: <Widget>[
-                  Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  "Debt: ₦$t5",
-                  style: TextStyle(
-                      fontSize: 22,
-                      color: primaryColor,
-                      fontWeight: FontWeight.w900),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Debt: ₦$t5",
+                      style: TextStyle(
+                          fontSize: 22,
+                          color: primaryColor,
+                          fontWeight: FontWeight.w900),
+                    ),
+                    SizedBox(width: 10),
+                    Text(
+                      "Earning: ₦$t6",
+                      style: TextStyle(
+                          fontSize: 22,
+                          color: primaryColor,
+                          fontWeight: FontWeight.w900),
+                    ),
+                  ],
                 ),
-                SizedBox(width: 10),
-                Text(
-                  "Earning: ₦$t6",
-                  style: TextStyle(
-                      fontSize: 22,
-                      color: primaryColor,
-                      fontWeight: FontWeight.w900),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    CustomButton(
+                      onPress: () {
+                        if (double.parse(t5) < 500) {
+                          showCenterToast(
+                              "You can't pay less than ₦500", context);
+                          return;
+                        }
+                        payDebt(context);
+                      },
+                      title: "PAY DEBT",
+                      iconLeft: false,
+                      icon: Icon(
+                        Icons.arrow_forward_ios,
+                        color: Colors.white,
+                      ),
+                    ),
+                    CustomButton(
+                      onPress: () {
+                        print(t6);
+                        if (double.parse(t6) < 500) {
+                          showCenterToast(
+                              "You can't WITHDRAW less than ₦500", context);
+                          return;
+                        }
+                        withdraw(context);
+                      },
+                      title: "WITHDRAW",
+                      iconLeft: false,
+                      hasColor: true,
+                      bgColor: Colors.deepOrange,
+                      icon: Icon(
+                        Icons.arrow_forward_ios,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-                  ),
-                  SizedBox(height: 20),
-                  Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                CustomButton(
-                  onPress: () {
-                    if (double.parse(t5) < 500) {
-                      showCenterToast(
-                          "You can't pay less than ₦500", context);
-                      return;
-                    }
-                    payDebt(context);
-                  },
-                  title: "PAY DEBT",
-                  iconLeft: false,
-                  icon: Icon(
-                    Icons.arrow_forward_ios,
-                    color: Colors.white,
-                  ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text("Transactions",
+                      style: TextStyle(
+                          fontSize: 20,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold)),
                 ),
-                CustomButton(
-                  onPress: () {
-                    if (double.parse(t5) < 500) {
-                      showCenterToast(
-                          "You can't WITHDRAW less than ₦500", context);
-                      return;
-                    }
-                    withdraw(context);
-                  },
-                  title: "WITHDRAW",
-                  iconLeft: false,
-                  hasColor: true,
-                  bgColor: Colors.deepOrange,
-                  icon: Icon(
-                    Icons.arrow_forward_ios,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-                  ),
-                  Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text("Transactions",
-                  style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold)),
-                  ),
-                  trxs.length == 0
-                ? Padding(
-                  padding: const EdgeInsets.all(38.0),
-                  child: emptyList("Transactions"),
-                )
-                : ListView.builder(
-                    itemCount: trxs.length,
-                    itemBuilder: (context, index) {
-                      return GestureDetector(
-                        onTap: () {},
-                        child: Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              boxShadow: [
-                                BoxShadow(color: Colors.black12)
-                              ],
-                              borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Center(
-                              child: ListTile(
-                                title: Text(
-                                  trxs[index].amount,
-                                  style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.black),
+                trxs.length == 0
+                    ? Padding(
+                        padding: const EdgeInsets.all(38.0),
+                        child: emptyList("Transactions"),
+                      )
+                    : ListView.builder(
+                        itemCount: trxs.length,
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onTap: () {},
+                            child: Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  boxShadow: [BoxShadow(color: Colors.black12)],
+                                  borderRadius: BorderRadius.circular(15),
                                 ),
-                                subtitle: Text(
-                                  trxs[index].date,
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
+                                child: Center(
+                                  child: ListTile(
+                                    title: Text(
+                                      trxs[index].amount,
+                                      style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.black),
+                                    ),
+                                    subtitle: Text(
+                                      trxs[index].date,
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                        color: Colors.black,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-                ]),
+                          );
+                        },
+                      ),
+              ]),
             );
           }
           return CupertinoActivityIndicator(radius: 20);

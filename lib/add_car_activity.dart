@@ -206,11 +206,11 @@ class _AddCarActivityState extends State<AddCarActivity>
         });
       });
     } else {
-      StorageReference reference =
+      Reference reference =
           FirebaseStorage.instance.ref().child("images/${randomString()}");
 
-      StorageUploadTask uploadTask = reference.putFile(_carImage);
-      StorageTaskSnapshot downloadUrl = (await uploadTask.onComplete);
+     UploadTask uploadTask = reference.putFile(_carImage);
+       TaskSnapshot downloadUrl = (await uploadTask.whenComplete(() => null));
       String url = (await downloadUrl.ref.getDownloadURL());
 
       carsReference.child(randomString()).set({

@@ -194,7 +194,7 @@ class _CusMainPageState extends State<CusMainPage> {
                         padding: const EdgeInsets.only(left: 10.0),
                         child: Text(
                           "Logout",
-                          style: TextStyle(color: Colors.white, fontSize: 18),
+                          style: TextStyle(color: Colors.white, fontSize: 16),
                         ),
                       )
                     ],
@@ -256,7 +256,7 @@ class _CusMainPageState extends State<CusMainPage> {
                       padding: const EdgeInsets.only(left: 10.0),
                       child: Text(
                         "Change Password",
-                        style: TextStyle(color: Colors.white, fontSize: 18),
+                        style: TextStyle(color: Colors.white, fontSize: 16),
                       ),
                     )
                   ],
@@ -299,10 +299,10 @@ class _CusMainPageState extends State<CusMainPage> {
 
                           return Text(
                             mName ?? "",
-                            style: Theme.of(context)
-                                .textTheme
-                                .subhead
-                                .copyWith(color: Colors.white),
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold),
                           );
                         },
                       ),
@@ -313,10 +313,10 @@ class _CusMainPageState extends State<CusMainPage> {
 
                           return Text(
                             mEmail ?? "",
-                            style:
-                                Theme.of(context).textTheme.subtitle.copyWith(
-                                      color: Colors.white.withAlpha(200),
-                                    ),
+                            style: TextStyle(
+                                color: Colors.white54,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600),
                           );
                         },
                       ),
@@ -435,8 +435,6 @@ class _CusMainPageState extends State<CusMainPage> {
         ));
   }
 
-  String _debugLabelString = "";
-
   bool _requireConsent = true;
 
   Future<void> initPlatformState() async {
@@ -452,24 +450,13 @@ class _CusMainPageState extends State<CusMainPage> {
     };
 
     OneSignal.shared
-        .setNotificationReceivedHandler((OSNotification notification) {
-      setState(() {
-        _debugLabelString =
-        "Received notification: \n${notification.jsonRepresentation().replaceAll("\\n", "\n")}";
-      });
-      setState(() {});
-    });
+        .setNotificationReceivedHandler((OSNotification notification) {});
 
     OneSignal.shared
         .setNotificationOpenedHandler((OSNotificationOpenedResult result) {});
 
     OneSignal.shared
-        .setInAppMessageClickedHandler((OSInAppMessageAction action) {
-      this.setState(() {
-        _debugLabelString =
-        "In App Message Clicked: \n${action.jsonRepresentation().replaceAll("\\n", "\n")}";
-      });
-    });
+        .setInAppMessageClickedHandler((OSInAppMessageAction action) {});
 
     OneSignal.shared
         .setSubscriptionObserver((OSSubscriptionStateChanges changes) {
@@ -481,9 +468,9 @@ class _CusMainPageState extends State<CusMainPage> {
     });
 
     OneSignal.shared.setEmailSubscriptionObserver(
-            (OSEmailSubscriptionStateChanges changes) {
-          print("EMAIL SUBSCRIPTION STATE CHANGED ${changes.jsonRepresentation()}");
-        });
+        (OSEmailSubscriptionStateChanges changes) {
+      print("EMAIL SUBSCRIPTION STATE CHANGED ${changes.jsonRepresentation()}");
+    });
 
     await OneSignal.shared.init(oneOnlineSignalKey, iOSSettings: settings);
 
@@ -500,21 +487,12 @@ class _CusMainPageState extends State<CusMainPage> {
     String _externalUserId = mUID;
     OneSignal.shared.setExternalUserId(_externalUserId).then((results) {
       if (results == null) return;
-
-      this.setState(() {
-        _debugLabelString = "External user id set: $results";
-      });
     });
   }
 
   void _handleRemoveExternalUserId() {
     OneSignal.shared.removeExternalUserId().then((results) {
       if (results == null) return;
-
-      this.setState(() {
-        _debugLabelString = "External user id removed: $results";
-      });
     });
   }
-
 }

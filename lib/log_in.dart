@@ -16,6 +16,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'libraries/custom_button.dart';
 import 'libraries/show_exception_alert_dialog.dart';
+import 'libraries/snackbar.dart';
 import 'utils/type_constants.dart';
 
 TabController _tabController;
@@ -119,131 +120,44 @@ class _SignInPageState extends State<SignInPage> {
     await _firebaseAuth
         .signInWithEmailAndPassword(email: email, password: password)
         .then((value) {
-      FirebaseUser user = value.user;
+      User user = value.user;
 
       if (value.user != null) {
-        if (!value.user.isEmailVerified) {
+        if (!value.user.emailVerified) {
           setState(() {
             isLoading = false;
           });
-          showDialog(
-              context: context,
-              builder: (_) {
-                return CupertinoAlertDialog(
-                  title: Text(
-                    "Email not verified!",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.black, fontSize: 20),
-                  ),
-                  actions: <Widget>[
-                    CustomButton(title: "OK", onPress: (){
-                      Navigator.pop(context);
-                    })
-                  ],
-                );
-              });
+
+          showSnackBar(context, "Error", "Email not verified!", duration: 4);
+
           _firebaseAuth.signOut();
           return;
         }
-        Firestore.instance
+        FirebaseFirestore.instance
             .collection('All')
-            .document(user.uid)
+            .doc(user.uid)
             .get()
             .then((document) {
-          String type = document.data["Type"];
-          String state = document.data["State"];
+          String type = document["Type"];
+          String state = document["State"];
 
           showToast(state, context);
 
           if (state == "Blocked") {
-            showDialog(
-                context: context,
-                builder: (_) {
-                  return CupertinoAlertDialog(
-                    title: Text(
-                      "Notice",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.black, fontSize: 18),
-                    ),
-                    content: Text(
-                      "Your Account has been blocked for going against the FABAT rules. Check with the Admin through our various channels.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.red, fontSize: 16),
-                    ),
-                    actions: <Widget>[
-                      Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(5.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(50),
-                                color: primaryColor),
-                            child: FlatButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: Text(
-                                "OK",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                });
+            showSnackBar(context, "Alert",
+                "Your Account has been blocked for going against the FABAT rules. Check with the Admin through our various channels.",
+                duration: 6);
+
             _firebaseAuth.signOut();
             setState(() {
               isLoading = false;
             });
             return;
           } else if (state == "Review") {
-            showDialog(
-                context: context,
-                builder: (_) {
-                  return CupertinoAlertDialog(
-                    title: Text(
-                      "Notice",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.red, fontSize: 18),
-                    ),
-                    content: Text(
-                      "Your Account has not been approved as it is under review. Check again in the next 24 hours!",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.black, fontSize: 16),
-                    ),
-                    actions: <Widget>[
-                      Center(
-                        child: Padding(
-                          padding: EdgeInsets.all(5.0),
-                          child: Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(50),
-                                color: primaryColor),
-                            child: FlatButton(
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                              child: Text(
-                                "OK",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w900,
-                                    color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                });
+            showSnackBar(context, "Alert",
+                "Your Account has not been approved as it is under review. Check again in the next 24 hours!",
+                duration: 4);
+
             _firebaseAuth.signOut();
             setState(() {
               isLoading = false;
@@ -260,8 +174,8 @@ class _SignInPageState extends State<SignInPage> {
             );
 
             String uid = type == "Customer" ? "Uid" : "Mech Uid";
-            putInDB(type, document.data[uid], document.data["Email"],
-                document.data["Company Name"], document.data["Phone Number"]);
+            putInDB(type, document[uid], document["Email"],
+                document["Company Name"], document["Phone Number"]);
 
             showToast("Logged in", context);
           }
@@ -404,56 +318,9 @@ class _SignInPageState extends State<SignInPage> {
                                           setState(() {
                                             isLoading = false;
                                           });
-                                          showDialog(
-                                              context: context,
-                                              builder: (_) {
-                                                return CupertinoAlertDialog(
-                                                  title: Text(
-                                                    "Reset email sent!",
-                                                    textAlign: TextAlign.center,
-                                                    style: TextStyle(
-                                                        color: Colors.black,
-                                                        fontSize: 20),
-                                                  ),
-                                                  actions: <Widget>[
-                                                    Center(
-                                                      child: Padding(
-                                                        padding:
-                                                            EdgeInsets.all(5.0),
-                                                        child: Container(
-                                                          decoration: BoxDecoration(
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          50),
-                                                              color:
-                                                                  primaryColor),
-                                                          child: FlatButton(
-                                                            onPressed: () {
-                                                              Navigator.of(
-                                                                      context)
-                                                                  .pop();
-                                                            },
-                                                            child: Text(
-                                                              "OK",
-                                                              textAlign:
-                                                                  TextAlign
-                                                                      .center,
-                                                              style: TextStyle(
-                                                                  fontSize: 20,
-                                                                  fontWeight:
-                                                                      FontWeight
-                                                                          .w900,
-                                                                  color: Colors
-                                                                      .white),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                );
-                                              });
+                                          showSnackBar(context, "Alert",
+                                              "Reset email sent!",
+                                              duration: 4);
                                         }).catchError((e) {
                                           showExceptionAlertDialog(
                                               context: context,
@@ -540,7 +407,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget build(BuildContext context) {
     return Center(
       child: ListView(
-          shrinkWrap: true,
+        shrinkWrap: true,
         children: <Widget>[
           Center(child: currentWidget),
           Padding(
@@ -614,7 +481,7 @@ class _CusSignUpState extends State<CusSignUp> {
     await _firebaseAuth
         .createUserWithEmailAndPassword(email: email, password: password)
         .then((value) {
-      FirebaseUser user = value.user;
+      User user = value.user;
 
       if (value.user != null) {
         user.sendEmailVerification().then((verify) {
@@ -628,14 +495,11 @@ class _CusSignUpState extends State<CusSignUp> {
           mData.putIfAbsent(
               "Timestamp", () => DateTime.now().millisecondsSinceEpoch);
 
-          Firestore.instance
+          FirebaseFirestore.instance
               .collection("Customer")
-              .document(user.uid)
-              .setData(mData);
-          Firestore.instance
-              .collection("All")
-              .document(user.uid)
-              .setData(mData);
+              .doc(user.uid)
+              .set(mData);
+          FirebaseFirestore.instance.collection("All").doc(user.uid).set(mData);
           _dataRef
               .child("Customer Collection")
               .child(user.uid)
@@ -932,7 +796,7 @@ class _MechSignUpState extends State<MechSignUp> {
         .createUserWithEmailAndPassword(
             email: _upEmail.text, password: _upPass.text)
         .then((value) {
-      FirebaseUser user = value.user;
+      User user = value.user;
 
       if (value.user != null) {
         user.sendEmailVerification().then((verify) async {
@@ -980,11 +844,11 @@ class _MechSignUpState extends State<MechSignUp> {
           allJobs.putIfAbsent("Payment Request", () => "0");
           allJobs.putIfAbsent("Cash Payment Debt", () => "0");
 
-          Firestore.instance
+          FirebaseFirestore.instance
               .collection("Mechanics")
-              .document(user.uid)
-              .setData(m);
-          Firestore.instance.collection("All").document(user.uid).setData(m);
+              .doc(user.uid)
+              .set(m);
+          FirebaseFirestore.instance.collection("All").doc(user.uid).set(m);
           _dataRef
               .child("Mechanic Collection")
               .child(user.uid)
@@ -1016,65 +880,64 @@ class _MechSignUpState extends State<MechSignUp> {
           });
 
           if (_mainPicture != null) {
-            StorageReference reference =
-                _storageRef.child("images/${randomString()}");
+            var reference = _storageRef.child("images/${randomString()}");
 
-            StorageUploadTask uploadTask = reference.putFile(_mainPicture);
-            StorageTaskSnapshot downloadUrl = (await uploadTask.onComplete);
+            var uploadTask = reference.putFile(_mainPicture);
+            var downloadUrl = (await uploadTask.whenComplete(() => null));
             String url = (await downloadUrl.ref.getDownloadURL());
 
             rootRef.update({"Image Url": url});
 
-            Firestore.instance
+            FirebaseFirestore.instance
                 .collection("All")
-                .document(mUID)
-                .updateData({"Image Url": url});
+                .doc(mUID)
+                .update({"Image Url": url});
           }
 
           if (_previous2 != null) {
-            StorageReference reference =
-                _storageRef.child("images/${randomString()}");
+            Reference reference = _storageRef.child("images/${randomString()}");
 
-            StorageUploadTask uploadTask = reference.putFile(_previous2);
-            StorageTaskSnapshot downloadUrl = (await uploadTask.onComplete);
+            UploadTask uploadTask = reference.putFile(_previous2);
+            TaskSnapshot downloadUrl =
+                (await uploadTask.whenComplete(() => null));
             String url = (await downloadUrl.ref.getDownloadURL());
 
             rootRef.update({"PreviousImage2 Url": url});
 
-            Firestore.instance
+            FirebaseFirestore.instance
                 .collection("All")
-                .document(mUID)
-                .updateData({"PreviousImage2 Url": url});
+                .doc(mUID)
+                .update({"PreviousImage2 Url": url});
           }
           if (_cacImage != null) {
-            StorageReference reference =
-                _storageRef.child("images/${randomString()}");
+            Reference reference = _storageRef.child("images/${randomString()}");
 
-            StorageUploadTask uploadTask = reference.putFile(_cacImage);
-            StorageTaskSnapshot downloadUrl = (await uploadTask.onComplete);
+            UploadTask uploadTask = reference.putFile(_cacImage);
+            TaskSnapshot downloadUrl =
+                (await uploadTask.whenComplete(() => null));
             String url = (await downloadUrl.ref.getDownloadURL());
 
             rootRef.update({"CAC Image Url": url});
 
-            Firestore.instance
+            FirebaseFirestore.instance
                 .collection("All")
-                .document(mUID)
-                .updateData({"CAC Image Url": url});
+                .doc(mUID)
+                .update({"CAC Image Url": url});
           }
           if (_previous1 != null) {
-            StorageReference reference =
-                _storageRef.child("images/${randomString()}");
+            Reference reference = _storageRef.child("images/${randomString()}");
 
-            StorageUploadTask uploadTask = reference.putFile(_previous1);
-            StorageTaskSnapshot downloadUrl = (await uploadTask.onComplete);
+            UploadTask uploadTask = reference.putFile(_previous1);
+            TaskSnapshot downloadUrl =
+                (await uploadTask.whenComplete(() => null));
             String url = (await downloadUrl.ref.getDownloadURL());
 
             rootRef.update({"PreviousImage1 Url": url});
 
-            Firestore.instance
+            FirebaseFirestore.instance
                 .collection("All")
-                .document(mUID)
-                .updateData({"PreviousImage1 Url": url});
+                .doc(mUID)
+                .update({"PreviousImage1 Url": url});
           }
         }).catchError((e) {
           Navigator.pop(context);

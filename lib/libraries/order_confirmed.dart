@@ -5,7 +5,7 @@ import 'package:mechapp/cus_main.dart';
 class OrderConfirmedDone extends StatefulWidget {
   final String from;
 
-  const OrderConfirmedDone({Key key, this.from}) : super(key: key);
+  const OrderConfirmedDone({Key key, this.from = ""}) : super(key: key);
 
   @override
   _OrderConfirmedDoneState createState() => _OrderConfirmedDoneState();
@@ -15,13 +15,13 @@ class _OrderConfirmedDoneState extends State<OrderConfirmedDone> {
   @override
   void initState() {
     widget.from == "Cart"
-        ? Future.delayed(Duration(milliseconds: 3000)).then((val) {
+        ? Future.delayed(Duration(seconds: 5)).then((val) {
             Navigator.pushAndRemoveUntil(
                 context,
                 CupertinoPageRoute(builder: (context) => CusMainPage()),
                 (Route<dynamic> route) => false);
           })
-        : Future.delayed(Duration(milliseconds: 3000)).then((val) {
+        : Future.delayed(Duration(seconds: 5)).then((val) {
             Navigator.pushAndRemoveUntil(
                 context,
                 CupertinoPageRoute(builder: (context) => CusMainPage()),
@@ -54,20 +54,25 @@ class _OrderConfirmedDoneState extends State<OrderConfirmedDone> {
                 style: TextStyle(
                     color: Colors.black,
                     fontWeight: FontWeight.w800,
-                    fontSize: 28),
+                    fontSize: 20),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: FlatButton(
+                child: RaisedButton(
+                    color: Colors.lightGreen,
                     onPressed: () {
                       Navigator.pushAndRemoveUntil(
                           context,
-                          CupertinoPageRoute(builder: (context) => CusMainPage()),
+                          CupertinoPageRoute(
+                              builder: (context) => CusMainPage()),
                           (Route<dynamic> route) => false);
                     },
                     child: Text(
                       "CLOSE",
-                      style: TextStyle(color: Colors.red, fontSize: 20),
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold),
                     )),
               ),
               SizedBox(height: 30),
