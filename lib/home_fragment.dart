@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,8 +10,7 @@ import 'package:mechapp/each_service.dart';
 import 'package:mechapp/utils/my_models.dart';
 import 'package:mechapp/utils/type_constants.dart';
 import 'package:mechapp/view_mech_profile.dart';
-
-import 'libraries/carousel_slider.dart';
+import 'package:geocoding/geocoding.dart';
 
 class HomeFragment extends StatefulWidget {
   @override
@@ -28,16 +28,15 @@ class _HomeFragmentState extends State<HomeFragment> {
   }
 
   Future<Position> locateUser() async {
-    return Geolocator()
-        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    return Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
   }
 
   getUserLocation() async {
     try {
       currentLocation = await locateUser();
 
-      List<Placemark> placeMark = await Geolocator().placemarkFromCoordinates(
-          currentLocation.latitude, currentLocation.longitude);
+      List<Placemark> placeMark =
+          await placemarkFromCoordinates(currentLocation.latitude, currentLocation.longitude);
 
       setState(() {
         theAddress = placeMark[0].name;
@@ -56,10 +55,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Text("App might not function well"),
-                  Icon(Icons.error)
-                ],
+                children: <Widget>[Text("App might not function well"), Icon(Icons.error)],
               ),
               actions: <Widget>[
                 Center(
@@ -78,9 +74,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                           "OK",
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white),
+                              fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white),
                         ),
                       ),
                     ),
@@ -98,8 +92,7 @@ class _HomeFragmentState extends State<HomeFragment> {
   bool showSearch = false;
   bool noMechFound = false;
 
-  var rootRef =
-      FirebaseDatabase.instance.reference().child("Mechanic Collection");
+  var rootRef = FirebaseDatabase.instance.reference().child("Mechanic Collection");
 
   Map dATA = {};
 
@@ -156,6 +149,13 @@ class _HomeFragmentState extends State<HomeFragment> {
   Widget build(BuildContext context) {
     Color primaryColor = Theme.of(context).primaryColor;
 
+    CarouselOptions carouselOptions = CarouselOptions(
+      height: MediaQuery.of(context).size.height / 4,
+      autoPlay: true,
+      enableInfiniteScroll: true,
+      enlargeCenterPage: true,
+      pauseAutoPlayOnTouch: true,
+    );
     return Container(
       color: primaryColor,
       child: Column(
@@ -180,10 +180,8 @@ class _HomeFragmentState extends State<HomeFragment> {
                   String tempImage = dATA[key]['Image Url'];
                   String tempMechUid = dATA[key]['Mech Uid'];
                   String tempRating = dATA[key]['Rating'];
-                  var tempLongPos =
-                      double.parse(dATA[key]['LOc Longitude'].toString());
-                  var tempLatPos =
-                      double.parse(dATA[key]['Loc Latitude'].toString());
+                  var tempLongPos = double.parse(dATA[key]['LOc Longitude'].toString());
+                  var tempLatPos = double.parse(dATA[key]['Loc Latitude'].toString());
 
                   List cat = dATA[key]["Categories"];
                   List specs = dATA[key]["Specifications"];
@@ -210,11 +208,7 @@ class _HomeFragmentState extends State<HomeFragment> {
           Padding(
             padding: EdgeInsets.only(bottom: 8, left: 8.0, right: 8.0),
             child: CarouselSlider(
-              height: MediaQuery.of(context).size.height / 4,
-              autoPlay: true,
-              enableInfiniteScroll: true,
-              enlargeCenterPage: true,
-              pauseAutoPlayOnTouch: Duration(seconds: 5),
+              options: carouselOptions,
               items: [
                 "assets/images/cc1.jpg",
                 "assets/images/cc2.jpg",
@@ -233,8 +227,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                         children: <Widget>[
                           Align(
                             child: ClipRRect(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(15.0)),
+                              borderRadius: BorderRadius.all(Radius.circular(15.0)),
                               child: Image(
                                 image: AssetImage(i),
                                 fit: BoxFit.fill,
@@ -283,10 +276,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                 child: Text(
                   theAddress,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                      fontSize: 15,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w500),
+                  style: TextStyle(fontSize: 15, color: Colors.white, fontWeight: FontWeight.w500),
                 ),
               ),
             ],
@@ -311,8 +301,7 @@ class _HomeFragmentState extends State<HomeFragment> {
             padding: const EdgeInsets.only(bottom: 8.0),
             child: Text(
               textServices,
-              style: TextStyle(
-                  fontSize: 20, color: Colors.red, fontWeight: FontWeight.w700),
+              style: TextStyle(fontSize: 20, color: Colors.red, fontWeight: FontWeight.w700),
             ),
           ),
           Expanded(
@@ -353,22 +342,18 @@ class _HomeFragmentState extends State<HomeFragment> {
                                   Padding(
                                     padding: const EdgeInsets.all(4.0),
                                     child: CachedNetworkImage(
-                                      imageUrl:
-                                          httpServicesList[index].typeImageUrl,
+                                      imageUrl: httpServicesList[index].typeImageUrl,
                                       height: 40,
                                       width: 40,
                                       placeholder: (context, url) =>
-                                          CupertinoActivityIndicator(
-                                              radius: 10),
-                                      errorWidget: (context, url, error) =>
-                                          Icon(Icons.error),
+                                          CupertinoActivityIndicator(radius: 10),
+                                      errorWidget: (context, url, error) => Icon(Icons.error),
                                     ),
                                   ),
                                   Center(
                                     child: Text(
                                       httpServicesList[index].typeTitle,
-                                      style: TextStyle(
-                                          fontSize: 18, color: primaryColor),
+                                      style: TextStyle(fontSize: 18, color: primaryColor),
                                       textAlign: TextAlign.center,
                                     ),
                                   ),
@@ -377,8 +362,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                             ),
                           );
                         },
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
                       ),
                     ),
                     Visibility(
@@ -402,15 +386,12 @@ class _HomeFragmentState extends State<HomeFragment> {
                               child: Container(
                                 decoration: BoxDecoration(
                                     color: Colors.white,
-                                    boxShadow: [
-                                      BoxShadow(color: Colors.black12)
-                                    ],
+                                    boxShadow: [BoxShadow(color: Colors.black12)],
                                     borderRadius: BorderRadius.circular(15)),
                                 child: Center(
                                     child: ListTile(
                                   subtitle: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
                                       Row(
                                         children: <Widget>[
@@ -419,8 +400,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                                             color: primaryColor,
                                           ),
                                           Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                horizontal: 10),
+                                            padding: const EdgeInsets.symmetric(horizontal: 10),
                                             child: Text(
                                               sortedList[index].phoneNumber,
                                               style: TextStyle(
@@ -465,12 +445,10 @@ class _HomeFragmentState extends State<HomeFragment> {
                                     height: 48,
                                     width: 48,
                                     placeholder: (context, url) => Image(
-                                      image: AssetImage(
-                                          "assets/images/person.png"),
+                                      image: AssetImage("assets/images/person.png"),
                                     ),
                                     errorWidget: (context, url, error) => Image(
-                                      image: AssetImage(
-                                          "assets/images/person.png"),
+                                      image: AssetImage("assets/images/person.png"),
                                     ),
                                   ),
                                 )),
@@ -480,8 +458,7 @@ class _HomeFragmentState extends State<HomeFragment> {
                         },
                       ),
                     ),
-                    Visibility(
-                        child: emptyList("Mechanic"), visible: noMechFound)
+                    Visibility(child: emptyList("Mechanic"), visible: noMechFound)
                   ],
                 ),
               ),

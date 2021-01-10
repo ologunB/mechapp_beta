@@ -11,7 +11,6 @@ import 'package:mechapp/mechanic/mech_profile_fragment.dart';
 import 'package:mechapp/mechanic/mech_request_payment.dart';
 import 'package:mechapp/notifications_fragment.dart';
 import 'package:mechapp/utils/type_constants.dart';
-import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../libraries/drawerbehavior.dart';
@@ -130,7 +129,7 @@ class _MechMainPageState extends State<MechMainPage> {
     mEmail = await email;
     mPhone = await phone;
     mUID = await uid;
-    initPlatformState();
+    //initPlatformState();
   }
 
   @override
@@ -252,7 +251,7 @@ class _MechMainPageState extends State<MechMainPage> {
                         title: "Are you sure you want to log out?",
                         onClicked: () {
                           Navigator.pop(context);
-                          _handleRemoveExternalUserId();
+                          //_handleRemoveExternalUserId();
                           Navigator.of(context).pushReplacement(
                             CupertinoPageRoute(
                               fullscreenDialog: true,
@@ -418,7 +417,7 @@ class _MechMainPageState extends State<MechMainPage> {
       ),
     );
   }
-
+/*
   String _debugLabelString = "";
 
   bool _requireConsent = true;
@@ -499,5 +498,5 @@ class _MechMainPageState extends State<MechMainPage> {
         _debugLabelString = "External user id removed: $results";
       });
     });
-  }
+  }*/
 }

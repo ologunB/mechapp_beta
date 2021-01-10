@@ -8,7 +8,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mechapp/utils/my_models.dart';
 import 'package:mechapp/utils/type_constants.dart';
-
+import 'package:geocoding/geocoding.dart';
 import 'view_mech_profile.dart';
 
 class NearbyF extends StatefulWidget {
@@ -24,8 +24,7 @@ class _NearbyFState extends State<NearbyF> {
   List<Marker> markers = <Marker>[];
 
   Future<Map> getAllMechanics() async {
-    DatabaseReference dataRef =
-        FirebaseDatabase.instance.reference().child("Mechanic Collection");
+    DatabaseReference dataRef = FirebaseDatabase.instance.reference().child("Mechanic Collection");
 
     await dataRef.once().then((snapshot) {
       dATA = snapshot.value;
@@ -63,13 +62,12 @@ class _NearbyFState extends State<NearbyF> {
   }
 
   Future<Position> locateUser() async {
-    return Geolocator()
-        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    return Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
   }
 
   getUserLocation() async {
-    List<Placemark> placeMark = await Geolocator().placemarkFromCoordinates(
-        currentLocation.latitude, currentLocation.longitude);
+    List<Placemark> placeMark =
+        await placemarkFromCoordinates(currentLocation.latitude, currentLocation.longitude);
 
     setState(() {
       markers.add(
@@ -106,14 +104,10 @@ class _NearbyFState extends State<NearbyF> {
             String tempRating = dATA[key]['Rating'];
 
             String tempMechUid = dATA[key]['Mech Uid'];
-            var tempLongPos =
-                double.parse(dATA[key]['LOc Longitude'].toString());
+            var tempLongPos = double.parse(dATA[key]['LOc Longitude'].toString());
             var tempLatPos = double.parse(dATA[key]['Loc Latitude'].toString());
-            String tempDBtwn = calculateDistance(
-                    currentLocation.latitude,
-                    currentLocation.longitude,
-                    tempLatPos.toDouble(),
-                    tempLongPos.toDouble())
+            String tempDBtwn = calculateDistance(currentLocation.latitude,
+                    currentLocation.longitude, tempLatPos.toDouble(), tempLongPos.toDouble())
                 .toString();
             //  Future.delayed(Duration(milliseconds: 500));
             List cat = dATA[key]["Categories"];
@@ -140,8 +134,7 @@ class _NearbyFState extends State<NearbyF> {
               Marker(
                 markerId: MarkerId(mechList[i].uid),
                 position: LatLng(mechList[i].mLat, mechList[i].mLong),
-                infoWindow: InfoWindow(
-                    title: mechList[i].name, snippet: mechList[i].streetName),
+                infoWindow: InfoWindow(title: mechList[i].name, snippet: mechList[i].streetName),
                 onTap: () {},
               ),
             );
@@ -175,10 +168,8 @@ class _NearbyFState extends State<NearbyF> {
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: Text(
                     "Nearby Mechanics",
-                    style: TextStyle(
-                        fontSize: 18,
-                        color: primaryColor,
-                        fontWeight: FontWeight.w700),
+                    style:
+                        TextStyle(fontSize: 18, color: primaryColor, fontWeight: FontWeight.w700),
                   ),
                 ),
                 Expanded(
@@ -205,16 +196,12 @@ class _NearbyFState extends State<NearbyF> {
                                   child: Container(
                                     decoration: BoxDecoration(
                                         color: Colors.white,
-                                        boxShadow: [
-                                          BoxShadow(color: Colors.black12)
-                                        ],
-                                        borderRadius:
-                                            BorderRadius.circular(15)),
+                                        boxShadow: [BoxShadow(color: Colors.black12)],
+                                        borderRadius: BorderRadius.circular(15)),
                                     child: Center(
                                         child: ListTile(
                                       subtitle: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: <Widget>[
                                           Row(
                                             children: <Widget>[
@@ -223,15 +210,12 @@ class _NearbyFState extends State<NearbyF> {
                                                 color: primaryColor,
                                               ),
                                               Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                        horizontal: 10),
+                                                padding: const EdgeInsets.symmetric(horizontal: 10),
                                                 child: Text(
                                                   mechList[index].phoneNumber,
                                                   style: TextStyle(
                                                       fontSize: 18,
-                                                      fontWeight:
-                                                          FontWeight.w500,
+                                                      fontWeight: FontWeight.w500,
                                                       color: Colors.black54),
                                                 ),
                                               ),
@@ -243,9 +227,7 @@ class _NearbyFState extends State<NearbyF> {
                                           ),
                                           Expanded(
                                             child: Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: .0),
+                                              padding: const EdgeInsets.symmetric(horizontal: .0),
                                               child: Text(
                                                 " ${mechList[index].dBtwn}  KM Away",
                                                 style: TextStyle(
@@ -272,13 +254,10 @@ class _NearbyFState extends State<NearbyF> {
                                           height: 48,
                                           width: 48,
                                           placeholder: (context, url) => Image(
-                                            image: AssetImage(
-                                                "assets/images/person.png"),
+                                            image: AssetImage("assets/images/person.png"),
                                           ),
-                                          errorWidget: (context, url, error) =>
-                                              Image(
-                                            image: AssetImage(
-                                                "assets/images/person.png"),
+                                          errorWidget: (context, url, error) => Image(
+                                            image: AssetImage("assets/images/person.png"),
                                           ),
                                         ),
                                       ),
@@ -302,9 +281,8 @@ class _NearbyFState extends State<NearbyF> {
   static int calculateDistance(lat1, lon1, lat2, lon2) {
     var p = 0.017453292519943295;
     var c = cos;
-    var a = 0.5 -
-        c((lat2 - lat1) * p) / 2 +
-        c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
+    var a =
+        0.5 - c((lat2 - lat1) * p) / 2 + c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
     return (12742 * asin(sqrt(a))).toInt();
   }
 

@@ -5,6 +5,7 @@ import 'package:mechapp/utils/type_constants.dart';
 
 class TheModel {
   String msg, time;
+
   TheModel({this.msg, this.time});
 }
 
@@ -26,7 +27,6 @@ class _NotificationFState extends State<NotificationF> {
     await dataRef.once().then((snapshot) {
       var KEYS = snapshot.value.keys;
       var DATA = snapshot.value;
-      print(DATA);
 
       list.clear();
       for (var index in KEYS) {
@@ -64,9 +64,7 @@ class _NotificationFState extends State<NotificationF> {
                                 child: ListTile(
                                     title: Text(
                                       list[index].msg,
-                                      style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w500),
+                                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500),
                                     ),
                                     subtitle: Text(
                                       list[index].time,
@@ -76,8 +74,7 @@ class _NotificationFState extends State<NotificationF> {
                                           color: Colors.red),
                                     ),
                                     leading: Icon(Icons.notifications,
-                                        size: 30,
-                                        color: Theme.of(context).primaryColor)),
+                                        size: 30, color: Theme.of(context).primaryColor)),
                               ),
                             ),
                           );
@@ -105,7 +102,6 @@ class _NotificationFState extends State<NotificationF> {
               Navigator.pop(context);
             }),
       ),
-
       body: Container(
         color: primaryColor,
         child: ClipRRect(
@@ -114,9 +110,7 @@ class _NotificationFState extends State<NotificationF> {
             topRight: Radius.circular(20),
           ),
           child: Container(
-              height: double.infinity,
-              color: Color(0xb090A1AE),
-              child: _buildFutureBuilder()),
+              height: double.infinity, color: Color(0xb090A1AE), child: _buildFutureBuilder()),
         ),
       ),
     );

@@ -1,10 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoder/services/base.dart';
 import 'package:geolocator/geolocator.dart';
 import "package:google_maps_webservice/geocoding.dart";
 import 'package:google_maps_webservice/places.dart';
 import 'package:mechapp/utils/type_constants.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
+import 'package:geocoding/geocoding.dart';
 
 class GetLocationFromAddress extends StatefulWidget {
   TextEditingController upStreetName;
@@ -23,8 +25,7 @@ class _GetLocationFromAddressState extends State<GetLocationFromAddress> {
   }
 
   Future<Position> locateUser() async {
-    return Geolocator()
-        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    return Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
   }
 
   Position currentLocation;
@@ -35,10 +36,8 @@ class _GetLocationFromAddressState extends State<GetLocationFromAddress> {
 
       whereLat = currentLocation.latitude;
       whereLong = currentLocation.longitude;
-      List<Placemark> placeMark =
-          await Geolocator().placemarkFromCoordinates(whereLat, whereLong);
-      widget.upStreetName.text =
-          placeMark[0].name + ", " + placeMark[0].locality;
+      List<Placemark> placeMark = await  placemarkFromCoordinates(whereLat, whereLong);
+      widget.upStreetName.text = placeMark[0].name + ", " + placeMark[0].locality;
 
       setState(() {});
     } catch (e) {
@@ -55,10 +54,7 @@ class _GetLocationFromAddressState extends State<GetLocationFromAddress> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Text("App might not function well"),
-                Icon(Icons.error)
-              ],
+              children: <Widget>[Text("App might not function well"), Icon(Icons.error)],
             ),
             actions: <Widget>[
               Center(
@@ -77,9 +73,7 @@ class _GetLocationFromAddressState extends State<GetLocationFromAddress> {
                         "OK",
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white),
+                            fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white),
                       ),
                     ),
                   ),

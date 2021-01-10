@@ -15,7 +15,6 @@ import 'package:mechapp/nearby_fragment.dart';
 import 'package:mechapp/notifications_fragment.dart';
 import 'package:mechapp/shop_fragment.dart';
 import 'package:mechapp/utils/type_constants.dart';
-import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'database/database.dart';
@@ -133,7 +132,7 @@ class _CusMainPageState extends State<CusMainPage> {
     mEmail = await email;
     mPhone = await phone;
     mUID = await uid;
-    initPlatformState();
+    //  initPlatformState();
   }
 
   // bool isSearchingShop = false;
@@ -210,7 +209,7 @@ class _CusMainPageState extends State<CusMainPage> {
                               .build();
                           database.cartDao.deleteAllItems();
                           FirebaseAuth.instance.signOut();
-                          _handleRemoveExternalUserId();
+                          //  _handleRemoveExternalUserId();
                           Navigator.pop(context);
                           Navigator.of(context).pushReplacement(
                             CupertinoPageRoute(
@@ -300,9 +299,7 @@ class _CusMainPageState extends State<CusMainPage> {
                           return Text(
                             mName ?? "",
                             style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold),
+                                color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
                           );
                         },
                       ),
@@ -314,9 +311,7 @@ class _CusMainPageState extends State<CusMainPage> {
                           return Text(
                             mEmail ?? "",
                             style: TextStyle(
-                                color: Colors.white54,
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600),
+                                color: Colors.white54, fontSize: 14, fontWeight: FontWeight.w600),
                           );
                         },
                       ),
@@ -435,7 +430,7 @@ class _CusMainPageState extends State<CusMainPage> {
         ));
   }
 
-  bool _requireConsent = true;
+/* bool _requireConsent = true;
 
   Future<void> initPlatformState() async {
     if (!mounted) return;
@@ -494,5 +489,5 @@ class _CusMainPageState extends State<CusMainPage> {
     OneSignal.shared.removeExternalUserId().then((results) {
       if (results == null) return;
     });
-  }
+  }*/
 }

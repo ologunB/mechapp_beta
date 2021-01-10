@@ -10,13 +10,14 @@ import 'package:mechapp/view_mech_profile.dart';
 
 class EachService extends StatefulWidget {
   final String title;
+
   EachService({Key key, @required this.title}) : super(key: key);
+
   @override
   _EachServiceState createState() => _EachServiceState();
 }
 
-class _EachServiceState extends State<EachService>
-    with AutomaticKeepAliveClientMixin {
+class _EachServiceState extends State<EachService> with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
   List<EachMechanic> mechList = [];
@@ -27,8 +28,7 @@ class _EachServiceState extends State<EachService>
   List<Marker> markers = <Marker>[];
 
   Future<Map> getAllMechanics() async {
-    DatabaseReference dataRef =
-        FirebaseDatabase.instance.reference().child("Mechanic Collection");
+    DatabaseReference dataRef = FirebaseDatabase.instance.reference().child("Mechanic Collection");
 
     await dataRef.once().then((snapshot) {
       dATA = snapshot.value;
@@ -60,15 +60,13 @@ class _EachServiceState extends State<EachService>
   }
 
   Future<Position> locateUser() async {
-    return Geolocator()
-        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    return Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
   }
 
   getUserLocation() async {
     currentLocation = await locateUser();
     setState(() {
-      locationCoordinates =
-          LatLng(currentLocation.latitude, currentLocation.longitude);
+      locationCoordinates = LatLng(currentLocation.latitude, currentLocation.longitude);
     });
 
     /* List<Placemark> placeMark = await Geolocator().placemarkFromCoordinates(
@@ -79,8 +77,7 @@ class _EachServiceState extends State<EachService>
         Marker(
           markerId: MarkerId("Current Location"),
           position: LatLng(currentLocation.latitude, currentLocation.longitude),
-          infoWindow: InfoWindow(
-              title: mName, snippet: /*placeMark[0].name*/ "Decoded location"),
+          infoWindow: InfoWindow(title: mName, snippet: /*placeMark[0].name*/ "Decoded location"),
           icon: BitmapDescriptor.defaultMarkerWithHue(120.0),
           onTap: () {},
         ),
@@ -109,8 +106,7 @@ class _EachServiceState extends State<EachService>
             String tempImage = dATA[key]['Image Url'];
             String tempMechUid = dATA[key]['Mech Uid'];
             String tempRating = dATA[key]['Rating'];
-            var tempLongPos =
-                double.parse(dATA[key]['LOc Longitude'].toString());
+            var tempLongPos = double.parse(dATA[key]['LOc Longitude'].toString());
             var tempLatPos = double.parse(dATA[key]['Loc Latitude'].toString());
 
             List tempCat = dATA[key]["Categories"];
@@ -138,8 +134,7 @@ class _EachServiceState extends State<EachService>
               Marker(
                 markerId: MarkerId(mechList[i].uid),
                 position: LatLng(mechList[i].mLat, mechList[i].mLong),
-                infoWindow: InfoWindow(
-                    title: mechList[i].name, snippet: mechList[i].streetName),
+                infoWindow: InfoWindow(title: mechList[i].name, snippet: mechList[i].streetName),
                 onTap: () {},
               ),
             );
@@ -173,10 +168,8 @@ class _EachServiceState extends State<EachService>
                   padding: const EdgeInsets.only(bottom: 8.0),
                   child: Text(
                     "Available Mechanics",
-                    style: TextStyle(
-                        fontSize: 18,
-                        color: primaryColor,
-                        fontWeight: FontWeight.w700),
+                    style:
+                        TextStyle(fontSize: 18, color: primaryColor, fontWeight: FontWeight.w700),
                   ),
                 ),
                 Expanded(
@@ -201,15 +194,12 @@ class _EachServiceState extends State<EachService>
                                 child: Container(
                                   decoration: BoxDecoration(
                                       color: Colors.white,
-                                      boxShadow: [
-                                        BoxShadow(color: Colors.black12)
-                                      ],
+                                      boxShadow: [BoxShadow(color: Colors.black12)],
                                       borderRadius: BorderRadius.circular(15)),
                                   child: Center(
                                       child: ListTile(
                                     subtitle: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                       children: <Widget>[
                                         Row(
                                           children: <Widget>[
@@ -218,9 +208,7 @@ class _EachServiceState extends State<EachService>
                                               color: primaryColor,
                                             ),
                                             Padding(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 10),
+                                              padding: const EdgeInsets.symmetric(horizontal: 10),
                                               child: Text(
                                                 mechList[index].phoneNumber,
                                                 style: TextStyle(
@@ -257,10 +245,8 @@ class _EachServiceState extends State<EachService>
                                           height: 48,
                                           width: 48,
                                         ),
-                                        errorWidget: (context, url, error) =>
-                                            Image(
-                                          image: AssetImage(
-                                              "assets/images/person.png"),
+                                        errorWidget: (context, url, error) => Image(
+                                          image: AssetImage("assets/images/person.png"),
                                           height: 48,
                                           width: 48,
                                         ),

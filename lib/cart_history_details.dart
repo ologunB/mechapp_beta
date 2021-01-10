@@ -1,13 +1,16 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carousel_slider/carousel_options.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import 'libraries/carousel_slider.dart';
 import 'main_cart.dart';
 
 class CartHistoryDetails extends StatefulWidget {
   final CartHistoryModel cartItem;
+
   CartHistoryDetails({Key key, @required this.cartItem}) : super(key: key);
+
   @override
   _CartHistoryDetailsState createState() => _CartHistoryDetailsState();
 }
@@ -17,6 +20,13 @@ class _CartHistoryDetailsState extends State<CartHistoryDetails> {
 
   @override
   Widget build(BuildContext context) {
+    CarouselOptions carouselOptions = CarouselOptions(
+      height: MediaQuery.of(context).size.height / 3,
+      autoPlay: true,
+      enableInfiniteScroll: true,
+      enlargeCenterPage: true,
+      pauseAutoPlayOnTouch: true,
+    );
     Color primaryColor = Theme.of(context).primaryColor;
     var size = MediaQuery.of(context).size;
     return Scaffold(
@@ -33,11 +43,7 @@ class _CartHistoryDetailsState extends State<CartHistoryDetails> {
               Padding(
                 padding: EdgeInsets.only(bottom: 8, left: 8.0, right: 8.0),
                 child: CarouselSlider(
-                  height: MediaQuery.of(context).size.height / 3,
-                  autoPlay: true,
-                  enableInfiniteScroll: true,
-                  enlargeCenterPage: true,
-                  pauseAutoPlayOnTouch: Duration(seconds: 5),
+                  options: carouselOptions,
                   items: widget.cartItem.images.map((i) {
                     return Builder(
                       builder: (context) {
@@ -48,12 +54,10 @@ class _CartHistoryDetailsState extends State<CartHistoryDetails> {
                             imageUrl: i.toString(),
                             height: 100,
                             width: 100,
-                            placeholder: (context, url) =>
-                                CupertinoActivityIndicator(
+                            placeholder: (context, url) => CupertinoActivityIndicator(
                               radius: 20,
                             ),
-                            errorWidget: (context, url, error) =>
-                                Icon(Icons.error),
+                            errorWidget: (context, url, error) => Icon(Icons.error),
                           ),
                         );
                       },
@@ -70,18 +74,14 @@ class _CartHistoryDetailsState extends State<CartHistoryDetails> {
                     Text(
                       "Name:  ",
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.red,
-                          fontWeight: FontWeight.w700),
+                      style:
+                          TextStyle(fontSize: 18, color: Colors.red, fontWeight: FontWeight.w700),
                     ),
                     Flexible(
                       child: Text(
                         widget.cartItem.itemNames.toString(),
                         style: TextStyle(
-                            fontSize: 18,
-                            color: primaryColor,
-                            fontWeight: FontWeight.w700),
+                            fontSize: 18, color: primaryColor, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],
@@ -96,18 +96,14 @@ class _CartHistoryDetailsState extends State<CartHistoryDetails> {
                     Text(
                       "City: ",
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.red,
-                          fontWeight: FontWeight.w700),
+                      style:
+                          TextStyle(fontSize: 18, color: Colors.red, fontWeight: FontWeight.w700),
                     ),
                     Flexible(
                       child: Text(
                         widget.cartItem.city,
                         style: TextStyle(
-                            fontSize: 18,
-                            color: primaryColor,
-                            fontWeight: FontWeight.w700),
+                            fontSize: 18, color: primaryColor, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],
@@ -122,18 +118,14 @@ class _CartHistoryDetailsState extends State<CartHistoryDetails> {
                     Text(
                       "Number of Items: ",
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.red,
-                          fontWeight: FontWeight.w700),
+                      style:
+                          TextStyle(fontSize: 18, color: Colors.red, fontWeight: FontWeight.w700),
                     ),
                     Flexible(
                       child: Text(
                         widget.cartItem.numbers.toString(),
                         style: TextStyle(
-                            fontSize: 18,
-                            color: primaryColor,
-                            fontWeight: FontWeight.w700),
+                            fontSize: 18, color: primaryColor, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],
@@ -148,18 +140,14 @@ class _CartHistoryDetailsState extends State<CartHistoryDetails> {
                     Text(
                       "Address: ",
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.red,
-                          fontWeight: FontWeight.w700),
+                      style:
+                          TextStyle(fontSize: 18, color: Colors.red, fontWeight: FontWeight.w700),
                     ),
                     Flexible(
                       child: Text(
                         widget.cartItem.address,
                         style: TextStyle(
-                            fontSize: 18,
-                            color: primaryColor,
-                            fontWeight: FontWeight.w700),
+                            fontSize: 18, color: primaryColor, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],
@@ -174,18 +162,14 @@ class _CartHistoryDetailsState extends State<CartHistoryDetails> {
                     Text(
                       "Price:   ",
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.red,
-                          fontWeight: FontWeight.w700),
+                      style:
+                          TextStyle(fontSize: 18, color: Colors.red, fontWeight: FontWeight.w700),
                     ),
                     Flexible(
                       child: Text(
                         "\₦ " + widget.cartItem.price,
                         style: TextStyle(
-                            fontSize: 18,
-                            color: primaryColor,
-                            fontWeight: FontWeight.w700),
+                            fontSize: 18, color: primaryColor, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],
@@ -200,18 +184,14 @@ class _CartHistoryDetailsState extends State<CartHistoryDetails> {
                     Text(
                       "Sold By:   ",
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.red,
-                          fontWeight: FontWeight.w700),
+                      style:
+                          TextStyle(fontSize: 18, color: Colors.red, fontWeight: FontWeight.w700),
                     ),
                     Flexible(
                       child: Text(
                         widget.cartItem.sellers.toString(),
                         style: TextStyle(
-                            fontSize: 18,
-                            color: primaryColor,
-                            fontWeight: FontWeight.w700),
+                            fontSize: 18, color: primaryColor, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],
@@ -226,18 +206,14 @@ class _CartHistoryDetailsState extends State<CartHistoryDetails> {
                     Text(
                       "Status:   ",
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.red,
-                          fontWeight: FontWeight.w700),
+                      style:
+                          TextStyle(fontSize: 18, color: Colors.red, fontWeight: FontWeight.w700),
                     ),
                     Flexible(
                       child: Text(
                         widget.cartItem.status,
                         style: TextStyle(
-                            fontSize: 18,
-                            color: primaryColor,
-                            fontWeight: FontWeight.w700),
+                            fontSize: 18, color: primaryColor, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],

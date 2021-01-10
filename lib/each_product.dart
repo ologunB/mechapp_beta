@@ -1,11 +1,12 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:carousel_slider/carousel_options.dart';
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:mechapp/database/cart_model.dart';
 import 'package:mechapp/utils/my_models.dart';
 
 import 'database/database.dart';
-import 'libraries/carousel_slider.dart';
 import 'libraries/custom_button.dart';
 import 'main_cart.dart';
 
@@ -25,6 +26,13 @@ class _EachProductState extends State<EachProduct> {
   Widget build(BuildContext context) {
     Color primaryColor = Theme.of(context).primaryColor;
     var size = MediaQuery.of(context).size;
+    CarouselOptions carouselOptions = CarouselOptions(
+      height: MediaQuery.of(context).size.height / 3,
+      autoPlay: true,
+      enableInfiniteScroll: true,
+      enlargeCenterPage: true,
+      pauseAutoPlayOnTouch: true,
+    );
     return Scaffold(
       key: scaffoldKey,
       appBar: AppBar(
@@ -39,11 +47,7 @@ class _EachProductState extends State<EachProduct> {
               Padding(
                 padding: EdgeInsets.only(bottom: 8, left: 8.0, right: 8.0),
                 child: CarouselSlider(
-                  height: MediaQuery.of(context).size.height / 3,
-                  autoPlay: true,
-                  enableInfiniteScroll: true,
-                  enlargeCenterPage: true,
-                  pauseAutoPlayOnTouch: Duration(seconds: 5),
+                  options: carouselOptions,
                   items: widget.shopItem.images.map((i) {
                     return Builder(
                       builder: (context) {
@@ -54,12 +58,10 @@ class _EachProductState extends State<EachProduct> {
                             imageUrl: i.toString(),
                             height: 100,
                             width: 100,
-                            placeholder: (context, url) =>
-                                CupertinoActivityIndicator(
+                            placeholder: (context, url) => CupertinoActivityIndicator(
                               radius: 20,
                             ),
-                            errorWidget: (context, url, error) =>
-                                Icon(Icons.error),
+                            errorWidget: (context, url, error) => Icon(Icons.error),
                           ),
                         );
                       },
@@ -76,18 +78,14 @@ class _EachProductState extends State<EachProduct> {
                     Text(
                       "Name:  ",
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.red,
-                          fontWeight: FontWeight.w700),
+                      style:
+                          TextStyle(fontSize: 18, color: Colors.red, fontWeight: FontWeight.w700),
                     ),
                     Flexible(
                       child: Text(
                         widget.shopItem.name,
                         style: TextStyle(
-                            fontSize: 18,
-                            color: primaryColor,
-                            fontWeight: FontWeight.w700),
+                            fontSize: 18, color: primaryColor, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],
@@ -99,17 +97,13 @@ class _EachProductState extends State<EachProduct> {
                   textAlign: TextAlign.center,
                   text: TextSpan(
                       text: "Description:\n",
-                      style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.red,
-                          fontWeight: FontWeight.w700),
+                      style:
+                          TextStyle(fontSize: 18, color: Colors.red, fontWeight: FontWeight.w700),
                       children: <TextSpan>[
                         TextSpan(
                           text: widget.shopItem.desc,
                           style: TextStyle(
-                              fontSize: 18,
-                              color: primaryColor,
-                              fontWeight: FontWeight.w700),
+                              fontSize: 18, color: primaryColor, fontWeight: FontWeight.w700),
                         )
                       ]),
                 ),
@@ -123,18 +117,14 @@ class _EachProductState extends State<EachProduct> {
                     Text(
                       "Price:   ",
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.red,
-                          fontWeight: FontWeight.w700),
+                      style:
+                          TextStyle(fontSize: 20, color: Colors.red, fontWeight: FontWeight.w700),
                     ),
                     Flexible(
                       child: Text(
                         "\₦ " + widget.shopItem.price,
                         style: TextStyle(
-                            fontSize: 25,
-                            color: primaryColor,
-                            fontWeight: FontWeight.w700),
+                            fontSize: 25, color: primaryColor, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],
@@ -149,18 +139,14 @@ class _EachProductState extends State<EachProduct> {
                     Text(
                       "Sold By:   ",
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 20,
-                          color: Colors.red,
-                          fontWeight: FontWeight.w700),
+                      style:
+                          TextStyle(fontSize: 20, color: Colors.red, fontWeight: FontWeight.w700),
                     ),
                     Flexible(
                       child: Text(
                         widget.shopItem.soldBy,
                         style: TextStyle(
-                            fontSize: 24,
-                            color: primaryColor,
-                            fontWeight: FontWeight.w700),
+                            fontSize: 24, color: primaryColor, fontWeight: FontWeight.w700),
                       ),
                     ),
                   ],
@@ -169,9 +155,8 @@ class _EachProductState extends State<EachProduct> {
               CustomButton(
                 title: "   ADD TO CART   ",
                 onPress: () async {
-                  final database = await $FloorAppDatabase
-                      .databaseBuilder('flutter_database.db')
-                      .build();
+                  final database =
+                      await $FloorAppDatabase.databaseBuilder('flutter_database.db').build();
                   database.cartDao.insertItem(CartModel(
                       widget.shopItem.itemID,
                       widget.shopItem.name,
@@ -187,9 +172,7 @@ class _EachProductState extends State<EachProduct> {
                       content: Text(
                         "Added to cart",
                         style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w400,
-                            color: Colors.white),
+                            fontSize: 18, fontWeight: FontWeight.w400, color: Colors.white),
                       ),
                       action: SnackBarAction(
                         label: "CHECKOUT",
