@@ -16,14 +16,15 @@ class MyGarage extends StatefulWidget {
   _ListViewNoteState createState() => _ListViewNoteState();
 }
 
-final carsReference =
-    FirebaseDatabase.instance.reference().child("Car Collection").child(mUID);
+
 
 class _ListViewNoteState extends State<MyGarage>
     with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
+
+  final carsReference = FirebaseDatabase.instance.reference().child("Car Collection").child(mUID);
   List<Car> cars;
   StreamSubscription<Event> _onCarAddedSubscription;
 

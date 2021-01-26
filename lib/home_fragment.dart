@@ -5,6 +5,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:geocoder/services/distant_google.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mechapp/each_service.dart';
 import 'package:mechapp/utils/my_models.dart';
@@ -34,7 +35,6 @@ class _HomeFragmentState extends State<HomeFragment> {
   getUserLocation() async {
     try {
       currentLocation = await locateUser();
-
       List<Placemark> placeMark =
           await placemarkFromCoordinates(currentLocation.latitude, currentLocation.longitude);
 
