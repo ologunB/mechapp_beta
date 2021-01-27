@@ -13,9 +13,8 @@ dependencies:
     sdk: flutter
   shared_preferences:
   cupertino_icons: ^0.1.2
-  # flutter_rave: ^0.0.5
-  image_picker:  #DONE TODO configure for iOS later
-  google_maps_flutter: ^0.5.24+1 #DONE TODO configure for iOS later
+  image_picker:
+  google_maps_flutter: ^0.5.24+1
   firebase_database:
   firebase_storage:
   intent: ^1.1.0
@@ -24,15 +23,10 @@ dependencies:
   cloud_firestore:
   url_launcher:
   cached_network_image:
-#  rave_flutter: ^0.0.9-alpha+1 #DONE TODO configure the iOS version later
- # geolocator:  #DONETODO configure the iOS version later
   geolocator: ^6.1.12
-  geocoding: ^1.0.5
   carousel_slider: ^2.3.1
   rave_flutter: ^0.0.9-alpha+2
-
-  geocoder: ^0.2.1
-  provider:
+  google_geocoding: ^0.1.4
   intl:
   loading_overlay:
   google_maps_webservice:
@@ -40,7 +34,6 @@ dependencies:
   floor: ^0.12.0
   flutter_google_places: ^0.2.5
   flutter_staggered_grid_view: ^0.3.2
- # onesignal_flutter: ^2.3.0
   flutter_svg: ^0.18.1
   flushbar: ^1.10.4
 

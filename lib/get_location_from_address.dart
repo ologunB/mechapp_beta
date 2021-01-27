@@ -1,12 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:geocoder/services/base.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_geocoding/google_geocoding.dart' show LatLon, GoogleGeocoding;
 import "package:google_maps_webservice/geocoding.dart";
 import 'package:google_maps_webservice/places.dart';
 import 'package:mechapp/utils/type_constants.dart';
 import 'package:flutter_google_places/flutter_google_places.dart';
-import 'package:geocoding/geocoding.dart';
 
 class GetLocationFromAddress extends StatefulWidget {
   TextEditingController upStreetName;
@@ -36,9 +35,10 @@ class _GetLocationFromAddressState extends State<GetLocationFromAddress> {
 
       whereLat = currentLocation.latitude;
       whereLong = currentLocation.longitude;
-      List<Placemark> placeMark = await  placemarkFromCoordinates(whereLat, whereLong);
-      widget.upStreetName.text = placeMark[0].name + ", " + placeMark[0].locality;
-
+      var googleGeocoding = GoogleGeocoding(kGoogleMapKey);
+      var result =
+      await googleGeocoding.geocoding.getReverse(LatLon(whereLat, whereLong));
+      widget.upStreetName.text = result.results[0].formattedAddress.split(",")[0].trim();
       setState(() {});
     } catch (e) {
       showDialog(

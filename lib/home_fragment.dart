@@ -5,14 +5,12 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:geocoder/services/distant_google.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:mechapp/each_service.dart';
 import 'package:mechapp/utils/my_models.dart';
 import 'package:mechapp/utils/type_constants.dart';
 import 'package:mechapp/view_mech_profile.dart';
-import 'package:geocoding/geocoding.dart';
-
+import 'package:google_geocoding/google_geocoding.dart' show GoogleGeocoding, LatLon;
 class HomeFragment extends StatefulWidget {
   @override
   _HomeFragmentState createState() => _HomeFragmentState();
@@ -35,11 +33,13 @@ class _HomeFragmentState extends State<HomeFragment> {
   getUserLocation() async {
     try {
       currentLocation = await locateUser();
-      List<Placemark> placeMark =
-          await placemarkFromCoordinates(currentLocation.latitude, currentLocation.longitude);
+      var googleGeocoding = GoogleGeocoding(kGoogleMapKey);
+      var result =
+      await googleGeocoding.geocoding.getReverse(LatLon(currentLocation.latitude, currentLocation.longitude));
+      theAddress = result.results[0].formattedAddress.split(",")[0].trim();
 
       setState(() {
-        theAddress = placeMark[0].name;
+        theAddress = result.results[0].formattedAddress.split(",")[0].trim();
       });
     } catch (e) {
       showCupertinoDialog(

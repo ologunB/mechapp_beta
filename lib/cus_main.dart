@@ -187,7 +187,7 @@ class _CusMainPageState extends State<CusMainPage> {
                     children: <Widget>[
                       Padding(
                         padding: const EdgeInsets.only(left: 0.0),
-                        child: Icon(Icons.arrow_back, color: Colors.white),
+                        child: Icon(Icons.logout, color: Colors.red),
                       ),
                       Padding(
                         padding: const EdgeInsets.only(left: 10.0),

@@ -5,10 +5,10 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_geocoding/google_geocoding.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:mechapp/utils/my_models.dart';
 import 'package:mechapp/utils/type_constants.dart';
-import 'package:geocoding/geocoding.dart';
 import 'view_mech_profile.dart';
 
 class NearbyF extends StatefulWidget {
@@ -66,15 +66,16 @@ class _NearbyFState extends State<NearbyF> {
   }
 
   getUserLocation() async {
-    List<Placemark> placeMark =
-        await placemarkFromCoordinates(currentLocation.latitude, currentLocation.longitude);
+    var googleGeocoding = GoogleGeocoding(kGoogleMapKey);
+    var result =
+    await googleGeocoding.geocoding.getReverse(LatLon(currentLocation.latitude, currentLocation.longitude));
 
     setState(() {
       markers.add(
         Marker(
           markerId: MarkerId("Current Location"),
           position: LatLng(currentLocation.latitude, currentLocation.longitude),
-          infoWindow: InfoWindow(title: mName, snippet: placeMark[0].name),
+          infoWindow: InfoWindow(title: mName, snippet: result.results[0].formattedAddress.split(",")[0].trim()),
           icon: BitmapDescriptor.defaultMarkerWithHue(120.0),
           onTap: () {},
         ),
